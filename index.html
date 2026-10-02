@@ -169,6 +169,37 @@
             background: #ffd166;
         }
 
+
+        /* ================= NOVO MOTOR DE SIMULAÇÃO INTERATIVA ================= */
+        .practice-scene-wrap { position: relative; width: 100%; min-height: 340px; }
+        .practice-scene-wrap svg { display: block; width: 100%; height: 100%; min-height: 320px; }
+        .practice-hotspot { cursor: pointer; transition: transform .2s ease, filter .2s ease, opacity .2s ease; transform-box: fill-box; transform-origin: center; }
+        .practice-hotspot:hover { filter: drop-shadow(0 0 7px rgba(255,209,102,.65)); }
+        .practice-hotspot.selected { filter: drop-shadow(0 0 10px rgba(255,209,102,.95)); }
+        .practice-draggable { cursor: grab; touch-action: none; }
+        .practice-draggable.dragging { cursor: grabbing; filter: drop-shadow(0 0 12px rgba(17,138,178,.95)); }
+        .practice-road-car { transform-box: fill-box; transform-origin: center; }
+        .practice-outcome { pointer-events: none; }
+        .practice-pulse { animation: practicePulse 1.2s ease-in-out infinite; }
+        .practice-shake { animation: practiceShake .42s ease-in-out 2; }
+        .practice-correct-path { stroke-dasharray: 11 9; animation: dashFlow .85s linear infinite; }
+        .practice-wrong-path { stroke-dasharray: 9 7; animation: dashFlow .5s linear infinite; }
+        @keyframes practicePulse { 0%,100%{opacity:.65;transform:scale(1)} 50%{opacity:1;transform:scale(1.06)} }
+        @keyframes practiceShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+        @keyframes dashFlow { to { stroke-dashoffset:-40; } }
+        @keyframes practiceDriveLeft { from { transform: translateX(0); } to { transform: translateX(-72px); } }
+        @keyframes practiceDriveRight { from { transform: translateX(0); } to { transform: translateX(72px); } }
+        @keyframes practiceDriveAhead { from { transform: translateY(18px); } to { transform: translateY(-42px); } }
+        @keyframes practiceConflict { 0%{transform:translate(0,0)} 35%{transform:translate(15px,-8px)} 55%{transform:translate(2px,2px) rotate(3deg)} 100%{transform:translate(0,0)} }
+        .practice-legend-dot { width: 9px; height: 9px; border-radius: 999px; display:inline-block; }
+        .practice-mini-chip { display:inline-flex; align-items:center; gap:.35rem; padding:.28rem .5rem; border-radius:.65rem; border:1px solid rgba(148,163,184,.22); background:rgba(15,23,42,.55); font-size:10px; font-weight:800; }
+        .practice-action-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.65rem; }
+        @media (max-width:640px){
+            .practice-scene-wrap { min-height: 270px; }
+            .practice-scene-wrap svg { min-height: 260px; }
+            .practice-action-grid { grid-template-columns:1fr; }
+        }
+
         @media print {
             body * {
                 visibility: hidden;
@@ -254,7 +285,7 @@
                         <i class="fa-solid font-bold fa-shield-halved"></i> Aprenda com o Braia • CTB & Direção Defensiva
                     </div>
                     <h2 class="text-2xl sm:text-4xl font-black text-white mb-3 leading-tight">
-                        Seja uma igual o Braia! 🚘
+                        Seja uma motora igual o Braia! 🚘
                     </h2>
                     <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
                         Vai entender as preferências em rotatórias, ultrapassagens, placas, regras de cruzamento e situações da vida real chapa.
@@ -328,6 +359,40 @@
                         <span id="badgePendingErrors" class="px-2 py-0.5 rounded-full bg-sinalVermelho text-white text-[10px] font-black">0</span>
                     </div>
                 </div>
+
+            </div>
+
+            <!-- ================= NOVO: PRÁTICA DE DIREÇÃO ================= -->
+            <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-sky-500/20 mb-8">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/30 text-cnhAzul text-[10px] sm:text-xs font-black uppercase tracking-wider">
+                            <i class="fa-solid fa-steering-wheel"></i> Simulador Interativo
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-black text-white mt-2">Prática de Direção e Tomada de Decisão</h2>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1">Clique, arraste e execute manobras em cenas de trânsito. O mesmo motor gera vários níveis e situações.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="app.startPractice('facil')" class="px-3.5 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 hover:border-sinalVerde text-sinalVerde text-xs font-black">🟢 Fácil</button>
+                        <button onclick="app.startPractice('medio')" class="px-3.5 py-2.5 rounded-xl bg-sky-500/10 border border-sky-500/30 hover:border-cnhAzul text-sky-300 text-xs font-black">🔵 Médio</button>
+                        <button onclick="app.startPractice('dificil')" class="px-3.5 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:border-sinalAmarelo text-sinalAmarelo text-xs font-black">🟡 Difícil</button>
+                        <button onclick="app.startPractice('avancado')" class="px-3.5 py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 hover:border-sinalVermelho text-rose-300 text-xs font-black">🔴 Avançado</button>
+                        <button onclick="app.startFullSimulation()" class="px-3.5 py-2.5 rounded-xl bg-asfaltoCard border border-slate-600 hover:border-sinalAmarelo text-white text-xs font-black">🎯 Simulado Completo</button>
+                        <button onclick="app.showScreen('screen-performance')" class="px-3.5 py-2.5 rounded-xl bg-asfaltoCard border border-slate-700 hover:border-sinalVerde text-slate-200 text-xs font-black">📊 Meu Desempenho</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PAINEL RESUMIDO DE DESEMPENHO ================= -->
+            <div class="glass-panel rounded-2xl p-4 sm:p-6 border border-emerald-500/20 mb-8">
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <div>
+                        <div class="text-[10px] uppercase tracking-wider font-black text-sinalVerde">Domínio aproximado</div>
+                        <h2 class="text-xl font-black text-white mt-1">Como está sua condução?</h2>
+                    </div>
+                    <button onclick="app.showScreen('screen-performance')" class="text-xs font-black text-sinalVerde hover:text-white">Ver detalhes →</button>
+                </div>
+                <div id="menuPerformancePanel" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3"></div>
             </div>
 
             <!-- Duolingo-style Learning Path -->
@@ -440,6 +505,91 @@
                                 Próximo Cenário <i class="fa-solid fa-arrow-right"></i>
                             </button>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= NOVA PAGE: SIMULADOR INTERATIVO ================= -->
+        <section id="screen-practice" class="page-screen">
+            <div class="glass-panel rounded-2xl p-4 sm:p-6 border border-sky-500/20 mb-6">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <div>
+                        <button onclick="app.showScreen('screen-menu')" class="text-xs text-slate-400 hover:text-white font-bold flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 mb-2">
+                            <i class="fa-solid fa-arrow-left"></i> Voltar ao Menu
+                        </button>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span id="practiceDifficultyBadge" class="px-2.5 py-1 rounded-md bg-sky-500/10 border border-sky-500/30 text-sky-300 text-[10px] font-black uppercase">Médio</span>
+                            <span id="practiceCategoryBadge" class="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-700 text-slate-300 text-[10px] font-black">Circulação</span>
+                            <span id="practiceArticleBadge" class="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-700 text-slate-400 text-[10px] font-bold">CTB</span>
+                        </div>
+                        <h2 id="practiceTitle" class="text-2xl font-black text-white mt-2">Situação prática</h2>
+                        <p id="practiceDescription" class="text-xs sm:text-sm text-slate-300 mt-1 max-w-4xl">Observe a cena e tome uma decisão.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-700 text-xs font-black text-slate-300"><span id="practiceProgressText">Situação 1 de 10</span></div>
+                        <div class="px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs font-black text-sinalAmarelo">🔥 <span id="practiceStreak">0</span></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-7">
+                        <div class="glass-panel rounded-2xl border border-slate-700/70 p-3 sm:p-4">
+                            <div id="practiceScene" class="practice-scene-wrap rounded-xl bg-asfalto overflow-hidden border border-slate-800"></div>
+                            <div class="flex flex-wrap items-center justify-center gap-2 mt-3 text-[10px] text-slate-500">
+                                <span class="practice-mini-chip"><span class="practice-legend-dot" style="background:#06d6a0"></span> caminho seguro</span>
+                                <span class="practice-mini-chip"><span class="practice-legend-dot" style="background:#ffd166"></span> área/objeto interativo</span>
+                                <span class="practice-mini-chip"><span class="practice-legend-dot" style="background:#ef476f"></span> risco/consequência</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-5">
+                        <div class="glass-panel rounded-2xl border border-slate-700/70 p-4 sm:p-5 h-full flex flex-col">
+                            <div class="mb-4">
+                                <div class="text-[10px] uppercase tracking-wider text-slate-500 font-black">Decisão da vez</div>
+                                <h3 id="practicePrompt" class="text-lg font-black text-white mt-1">Observe a situação</h3>
+                                <p id="practiceStepHint" class="text-xs text-slate-400 mt-1"></p>
+                            </div>
+                            <div id="practiceActions" class="practice-action-grid"></div>
+                            <div id="practiceFeedback" class="hidden mt-4 rounded-xl border p-4"></div>
+                            <div id="practiceBottomActions" class="mt-auto pt-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= NOVA PAGE: DESEMPENHO ================= -->
+        <section id="screen-performance" class="page-screen">
+            <div class="glass-panel rounded-2xl p-4 sm:p-6 border border-emerald-500/20 mb-6">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+                    <div>
+                        <button onclick="app.showScreen('screen-menu')" class="text-xs text-slate-400 hover:text-white font-bold flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 mb-2">
+                            <i class="fa-solid fa-arrow-left"></i> Voltar ao Menu
+                        </button>
+                        <div class="text-[10px] uppercase tracking-wider font-black text-sinalVerde">Painel de aprendizagem</div>
+                        <h2 class="text-2xl font-black text-white mt-1">Desempenho por Categoria</h2>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1">Percentuais aproximados calculados a partir dos registros de acerto/erro que o aplicativo mantém.</p>
+                    </div>
+                </div>
+                <div id="performanceDetailedPanel" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4"></div>
+
+                <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="glass-card rounded-2xl p-4 border border-slate-700/70">
+                        <div class="text-[10px] uppercase tracking-wider text-slate-500 font-black">Foco de revisão</div>
+                        <h3 id="performanceFocusTitle" class="font-black text-white mt-1">Continue praticando</h3>
+                        <p id="performanceFocusText" class="text-xs text-slate-400 mt-1 leading-relaxed"></p>
+                        <button onclick="app.showScreen('screen-errors')" class="mt-3 px-4 py-2 rounded-xl bg-slate-800 border border-slate-600 text-xs font-black text-slate-200">Abrir Caderno de Revisão</button>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4 border border-slate-700/70">
+                        <div class="text-[10px] uppercase tracking-wider text-slate-500 font-black">Prática concluída</div>
+                        <div class="flex items-end gap-3 mt-2">
+                            <div id="practiceCompletedCount" class="text-3xl font-black text-sinalAmarelo">0</div>
+                            <div class="text-xs text-slate-400 pb-1">situações corretas</div>
+                        </div>
+                        <p id="practiceCompletedText" class="text-xs text-slate-400 mt-1"></p>
                     </div>
                 </div>
             </div>
@@ -2505,5 +2655,1043 @@
             app.init();
         });
     </script>
+
+    <script>
+    /* =====================================================================
+       MOTOR DE SIMULAÇÃO INTERATIVA — extensão aditiva
+       Mantém SCENARIOS, simulado rápido, garagem, XP, moedas, troféus,
+       certificado, Caderno de Revisão e demais funcionalidades existentes.
+       ===================================================================== */
+
+    const PRACTICE_DIFFICULTY_LABELS = {
+        facil: 'Fácil',
+        medio: 'Médio',
+        dificil: 'Difícil',
+        avancado: 'Avançado'
+    };
+
+    const PRACTICE_CATEGORY_ORDER = ['Sinalização', 'Circulação', 'Preferência', 'Ultrapassagem', 'Direção defensiva'];
+
+    const PRACTICE_SCENARIOS = [
+        {
+            id:'practice_sign_01', difficulty:'facil', category:'Sinalização', article:'Sinalização de advertência', type:'signScene',
+            title:'Reconheça a placa dentro da cena',
+            description:'Você se aproxima de um cruzamento urbano. Clique na placa que alerta sobre interseção em nível e depois interprete seu significado.',
+            prompt:'Qual placa alerta para a aproximação de um cruzamento?',
+            correctSign:'cross',
+            meanings:[
+                {id:'cross', text:'Aproximação de interseção em nível.'},
+                {id:'school', text:'Área escolar obrigatória.'},
+                {id:'curve', text:'Curva acentuada adiante.'}
+            ],
+            explanation:'A placa de interseção em nível é de advertência e informa que o condutor se aproxima de um cruzamento.',
+            tags:['placas','cruzamento']
+        },
+        {
+            id:'practice_sign_02', difficulty:'facil', category:'Sinalização', article:'Sinalização vertical', type:'signScene',
+            title:'Leia a sinalização no ambiente real',
+            description:'Três placas aparecem em posições diferentes da via. Toque diretamente na placa PARE e indique a conduta esperada.',
+            prompt:'Qual placa exige parada obrigatória?',
+            correctSign:'stop',
+            meanings:[
+                {id:'stop', text:'Parada obrigatória antes de prosseguir.'},
+                {id:'yield', text:'Apenas reduzir a velocidade sem necessidade de ceder passagem.'},
+                {id:'noparking', text:'Proibição de estacionamento no trecho.'}
+            ],
+            explanation:'A placa R-1 determina parada obrigatória e exige a tomada de decisão antes de entrar no cruzamento.',
+            tags:['placas','pare']
+        },
+        {
+            id:'practice_light_01', difficulty:'facil', category:'Circulação', article:'Art. 44 do CTB', type:'decision', template:'trafficLight',
+            title:'Semáforo muda para amarelo',
+            description:'Você se aproxima do cruzamento e a luz muda de verde para amarelo. A distância permite uma parada segura.',
+            prompt:'Qual ação deve ser tomada agora?',
+            steps:[{
+                question:'A distância permite parar sem frenagem brusca.',
+                options:[{id:'stop',text:'Parar antes da faixa'},{id:'speed',text:'Acelerar para atravessar'},{id:'crosswalk',text:'Parar sobre a faixa'}],
+                correct:'stop',
+                explanation:'Com distância suficiente, o sinal amarelo exige atenção e a parada deve ser feita com segurança antes da faixa.'
+            }],
+            explanation:'A decisão correta evita avançar o sinal e preserva a faixa de pedestres.', tags:['semáforo','faixa']
+        },
+        {
+            id:'practice_cross_01', difficulty:'facil', category:'Preferência', article:'Art. 29 do CTB', type:'crossroadTurn',
+            title:'Cruze o cruzamento sem criar conflito',
+            description:'Clique no seu veículo, observe os demais movimentos e escolha a conversão que respeita a posição no cruzamento.',
+            prompt:'Selecione o seu veículo e depois a conversão.', selectedCar:'you',
+            cars:[{id:'you',x:200,y:242,color:'#118ab2',dir:'up'},{id:'red',x:112,y:152,color:'#ef476f',dir:'right'},{id:'yellow',x:286,y:70,color:'#ffd166',dir:'down'}],
+            correctTurn:'right',
+            turnOptions:[{id:'left',text:'↩️ Virar à esquerda'},{id:'right',text:'↪️ Virar à direita'},{id:'straight',text:'⬆️ Seguir reto'}],
+            explanation:'A trajetória correta depende da posição e da sinalização. Neste cenário, a conversão escolhida mantém o veículo na faixa compatível com a manobra.', tags:['cruzamento','conversão']
+        },
+        {
+            id:'practice_lane_01', difficulty:'medio', category:'Circulação', article:'Posicionamento na via', type:'moveLane',
+            title:'Mova o carro para a faixa correta',
+            description:'O mapa mostra três faixas. Você precisa se posicionar na faixa da direita para preparar uma conversão segura.',
+            prompt:'Arraste o carro azul para a faixa destacada.', targetLane:3, laneCount:3,
+            explanation:'O posicionamento prévio permite sinalizar e realizar a conversão sem cruzar trajetórias de outras faixas.', tags:['faixa','conversão']
+        },
+        {
+            id:'practice_ped_01', difficulty:'medio', category:'Direção defensiva', article:'Art. 70 do CTB', type:'decision', template:'pedestrian',
+            title:'Pedestre parcialmente oculto',
+            description:'Uma van encobre parte da calçada. Você percebe movimento próximo à faixa de pedestres e não consegue enxergar tudo.',
+            prompt:'Como agir diante da visibilidade limitada?',
+            steps:[{
+                question:'Há possibilidade real de um pedestre surgir entre os veículos.',
+                options:[{id:'slow',text:'Reduzir e preparar parada'},{id:'pass',text:'Acelerar antes que apareça'},{id:'horn',text:'Buzinar e manter a velocidade'}],
+                correct:'slow',
+                explanation:'Com visibilidade comprometida e possível travessia, a condução defensiva reduz velocidade e prepara uma parada segura.'
+            }],
+            explanation:'O objetivo é antecipar o risco, e não reagir somente depois que o pedestre surge.', tags:['pedestre','defensiva']
+        },
+        {
+            id:'practice_blind_01', difficulty:'medio', category:'Direção defensiva', article:'Direção defensiva', type:'blindSpot',
+            title:'Motocicleta no ponto cego',
+            description:'Você deseja mudar de faixa. Uma motocicleta está próxima da sua lateral traseira, em um ponto que pode não aparecer no espelho.',
+            prompt:'Prepare a mudança de faixa com segurança.',
+            steps:[
+                {question:'Antes de mover o carro, o que deve fazer?', options:[{id:'mirror',text:'Conferir espelhos e ponto cego'},{id:'move',text:'Mover imediatamente'},{id:'horn',text:'Acelerar e fechar espaço'}], correct:'mirror', explanation:'A checagem de espelhos e do ponto cego é uma etapa essencial antes de deslocar lateralmente o veículo.'},
+                {question:'Depois de confirmar que a faixa está livre, qual sequência é adequada?', options:[{id:'signal',text:'Sinalizar, deslocar suavemente e manter controle'},{id:'swerve',text:'Virar de uma vez'},{id:'brake',text:'Frear no meio da faixa'}], correct:'signal', explanation:'A mudança de faixa segura combina sinalização, verificação do espaço e deslocamento progressivo.'}
+            ],
+            explanation:'Motocicletas podem permanecer em áreas pouco visíveis. A prática reforça a checagem completa antes da mudança.', tags:['motocicleta','ponto cego']
+        },
+        {
+            id:'practice_sign_03', difficulty:'medio', category:'Sinalização', article:'Sinalização horizontal', type:'signScene',
+            title:'Interprete a sinalização no asfalto',
+            description:'A cena combina placas e marcas viárias. Toque na placa de limite de velocidade e depois indique o que ela comunica.',
+            prompt:'Qual sinalização deve ser lida como limite de velocidade?',
+            correctSign:'speed',
+            meanings:[
+                {id:'speed', text:'Define o limite de velocidade indicado na via.'},
+                {id:'parking', text:'Define uma área exclusiva para estacionamento.'},
+                {id:'school', text:'Indica travessia escolar obrigatória.'}
+            ],
+            explanation:'Placas regulamentadoras de velocidade comunicam um limite que deve ser respeitado nas condições indicadas.', tags:['placas','velocidade']
+        },
+        {
+            id:'practice_merge_01', difficulty:'dificil', category:'Circulação', article:'Regra de circulação', type:'merge',
+            title:'Entrada na pista sem cortar a trajetória',
+            description:'Você entra por uma faixa de aceleração e precisa encontrar um espaço seguro na via principal.',
+            prompt:'Escolha o ponto de entrada mais seguro.',
+            mergeOptions:[
+                {id:'near',text:'Entrar imediatamente, fechando o veículo ao lado'},
+                {id:'gap',text:'Usar a faixa de aceleração, sinalizar e entrar no espaço livre'},
+                {id:'shoulder',text:'Continuar pelo acostamento até conseguir passar'}
+            ],
+            correctMerge:'gap',
+            explanation:'O ingresso deve usar a faixa de aceleração e priorizar o fluxo que já circula na via principal, evitando conflito de trajetórias.', tags:['merge','faixa']
+        },
+        {
+            id:'practice_overtake_01', difficulty:'dificil', category:'Ultrapassagem', article:'Regras de ultrapassagem', type:'overtake',
+            title:'Ultrapassagem permitida: execute a sequência completa',
+            description:'A linha central é tracejada, há visibilidade e espaço suficiente. O veículo lento segue à frente.',
+            prompt:'Avalie, escolha a faixa, execute a manobra e retorne.', allowed:true,
+            steps:[
+                {question:'Há condições para iniciar a ultrapassagem?',options:[{id:'yes',text:'Sim, com segurança e sinalização'},{id:'no',text:'Não, porque toda ultrapassagem é proibida'}],correct:'yes',explanation:'Com linha adequada, visibilidade e espaço suficiente, a manobra pode ser iniciada desde que todas as demais condições de segurança sejam atendidas.'},
+                {question:'Para ultrapassar, qual faixa deve ser usada?',options:[{id:'left',text:'Faixa da esquerda'},{id:'right',text:'Acostamento'},{id:'same',text:'Permanecer atrás do veículo'}],correct:'left',explanation:'A ultrapassagem, como regra geral, é realizada pela esquerda.'},
+                {question:'Após ultrapassar, o que fazer?',options:[{id:'return',text:'Retornar gradualmente à faixa original quando houver espaço'},{id:'stay',text:'Permanecer na esquerda sem necessidade'},{id:'brake',text:'Frear imediatamente ao lado do veículo ultrapassado'}],correct:'return',explanation:'Depois de concluir a passagem, o retorno deve ocorrer com segurança e sem cortar a trajetória do outro veículo.'}
+            ],
+            explanation:'A execução segura é uma sequência: avaliar, sinalizar, deslocar-se, ultrapassar e retornar quando houver espaço.', tags:['ultrapassagem','faixa']
+        },
+        {
+            id:'practice_overtake_02', difficulty:'dificil', category:'Ultrapassagem', article:'Art. 203 do CTB', type:'overtake',
+            title:'Ultrapassagem proibida pela linha contínua',
+            description:'Você encontra uma linha amarela contínua e um veículo lento à frente. A cena mostra pouco espaço para visão do sentido contrário.',
+            prompt:'Qual é a decisão segura?', allowed:false,
+            forbiddenReason:'linha',
+            steps:[
+                {question:'Pode iniciar a ultrapassagem nesta situação?',options:[{id:'yes',text:'Sim, se buzinar e acelerar'},{id:'no',text:'Não, aguarde um trecho permitido'}],correct:'no',explanation:'A linha contínua na situação apresentada sinaliza restrição à transposição da linha para a ultrapassagem.'},
+                {question:'Como continuar?',options:[{id:'follow',text:'Reduzir conforme o fluxo e aguardar condição permitida'},{id:'shoulder',text:'Usar o acostamento para passar'},{id:'right',text:'Passar pela direita sem avaliar o ambiente'}],correct:'follow',explanation:'A alternativa segura é aguardar uma zona adequada para a manobra, mantendo distância e controle do veículo.'}
+            ],
+            explanation:'A aprendizagem aqui é reconhecer que pressa não cria uma exceção para a sinalização horizontal.', tags:['ultrapassagem','linha contínua']
+        },
+        {
+            id:'practice_cross_02', difficulty:'dificil', category:'Preferência', article:'Art. 29 do CTB', type:'crossroadTurn',
+            title:'Cruzamento com pedestre e bicicleta',
+            description:'Você vai virar à direita. Um pedestre está iniciando a travessia e uma bicicleta se aproxima pela lateral.',
+            prompt:'Selecione o veículo e escolha a trajetória que preserva as áreas vulneráveis.',
+            selectedCar:'you',
+            cars:[{id:'you',x:200,y:244,color:'#118ab2',dir:'up'},{id:'bike',x:275,y:148,color:'#06d6a0',dir:'left'},{id:'ped',x:218,y:105,color:'#ffffff',dir:'down'}],
+            correctTurn:'rightWait',
+            turnOptions:[{id:'right',text:'↪️ Virar imediatamente'},{id:'rightWait',text:'🛑 Reduzir, ceder passagem e então virar'},{id:'straight',text:'⬆️ Seguir sem avaliar'},{id:'left',text:'↩️ Cortar para a esquerda'}],
+            explanation:'A manobra deve ser compatibilizada com o fluxo vulnerável. Primeiro preserve a passagem do pedestre e mantenha distância segura da bicicleta.', tags:['cruzamento','pedestre','bicicleta']
+        },
+        {
+            id:'practice_blind_02', difficulty:'avancado', category:'Direção defensiva', article:'Direção defensiva', type:'blindSpot',
+            title:'Ponto cego + mudança de faixa em fluxo intenso',
+            description:'Três faixas estão carregadas. Uma motocicleta pode reaparecer rapidamente no ponto cego e há um veículo logo adiante.',
+            prompt:'Complete a sequência defensiva sem criar conflito.',
+            steps:[
+                {question:'Qual é a primeira decisão?',options:[{id:'mirror',text:'Espelhos + ponto cego + distância'},{id:'move',text:'Mover imediatamente'},{id:'speed',text:'Acelerar para abrir espaço'}],correct:'mirror',explanation:'Em fluxo intenso, a checagem de campo visual é ainda mais importante porque os intervalos são menores.'},
+                {question:'O ponto cego ainda contém uma motocicleta. O que fazer?',options:[{id:'wait',text:'Aguardar o espaço ficar livre'},{id:'cut',text:'Entrar mesmo assim'},{id:'horn',text:'Buzinar e cortar a frente'}],correct:'wait',explanation:'A ausência de espaço seguro impede a mudança naquele instante. A decisão correta é esperar.'},
+                {question:'Agora a faixa está livre. Como concluir?',options:[{id:'signal',text:'Sinalizar e deslocar progressivamente'},{id:'swerve',text:'Fazer movimento brusco'},{id:'stop',text:'Parar no meio da faixa'}],correct:'signal',explanation:'Com a faixa livre, a mudança deve ser sinalizada e progressiva.'}
+            ],
+            explanation:'O foco avançado é evitar decisões impulsivas quando o espaço lateral muda rapidamente.', tags:['moto','ponto cego','fluxo intenso']
+        },
+        {
+            id:'practice_signal_02', difficulty:'avancado', category:'Sinalização', article:'Art. 44-A do CTB', type:'decision', template:'redTurn',
+            title:'Sinal vermelho e conversão à direita',
+            description:'O semáforo está vermelho. Existe um painel de sinalização que deve ser lido antes de qualquer conversão.',
+            prompt:'Qual é a sequência correta?',
+            steps:[
+                {question:'Antes de virar, o que precisa ser confirmado?', options:[{id:'permit',text:'Se há sinalização permitindo a conversão'},{id:'time',text:'Se já passou das 22h'},{id:'speed',text:'Se estou rápido o suficiente'}], correct:'permit', explanation:'A conversão em sinal vermelho depende da existência de sinalização permissiva no local.'},
+                {question:'A sinalização não permite. Qual conduta?', options:[{id:'wait',text:'Aguardar o sinal verde'},{id:'turn',text:'Virar porque não há pedestres'},{id:'horn',text:'Buzinar e virar'}], correct:'wait', explanation:'Sem autorização específica, a conversão deve aguardar a abertura do sinal.'}
+            ],
+            explanation:'A placa inserida na cena muda a leitura do semáforo. Primeiro interprete a sinalização, depois aja.', tags:['semáforo','conversão']
+        },
+        {
+            id:'practice_combo_01', difficulty:'avancado', category:'Direção defensiva', article:'Direção defensiva', type:'decision', template:'rainObstacle',
+            title:'Chuva, obstáculo e ciclista no bordo da pista',
+            description:'A pista está molhada, há um obstáculo à frente e um ciclista ocupa a lateral. Você precisa ajustar a velocidade e escolher uma trajetória estável.',
+            prompt:'Escolha a sequência que reduz o risco.',
+            steps:[
+                {question:'Qual é a primeira ação?', options:[{id:'slow',text:'Reduzir suavemente e ampliar a atenção'},{id:'brake',text:'Frear bruscamente'},{id:'swerve',text:'Desviar de imediato'}], correct:'slow', explanation:'Em pista molhada, a primeira resposta defensiva é reduzir progressivamente e evitar movimentos bruscos.'},
+                {question:'Como contornar o obstáculo sem aproximar do ciclista?', options:[{id:'space',text:'Aguardar espaço e contornar mantendo distância lateral'},{id:'close',text:'Passar espremido entre obstáculo e bicicleta'},{id:'horn',text:'Buzinar e acelerar'}], correct:'space', explanation:'A trajetória segura preserva espaço lateral para o ciclista e evita uma correção brusca sobre piso molhado.'}
+            ],
+            explanation:'A combinação de aderência reduzida e usuário vulnerável exige uma direção suave, previsível e conservadora.', tags:['chuva','obstáculo','ciclista']
+        },
+        {
+            id:'practice_cross_03', difficulty:'avancado', category:'Preferência', article:'Art. 29 do CTB', type:'crossroadTurn',
+            title:'Cruzamento complexo: veículo, bike e pedestre',
+            description:'Escolha a sua posição, aguarde a área vulnerável e só então execute a trajetória compatível.',
+            prompt:'Clique no carro azul e execute a ação segura.',
+            selectedCar:'you',
+            cars:[{id:'you',x:200,y:250,color:'#118ab2',dir:'up'},{id:'car',x:90,y:150,color:'#f7b801',dir:'right'},{id:'bike',x:310,y:185,color:'#06d6a0',dir:'left'},{id:'ped',x:245,y:92,color:'#ffffff',dir:'down'}],
+            correctTurn:'safe',
+            turnOptions:[{id:'left',text:'↩️ Cortar o fluxo'},{id:'safe',text:'🛑 Ceder passagem e concluir a conversão com segurança'},{id:'straight',text:'⬆️ Seguir sem reduzir'}],
+            explanation:'O cenário avançado exige leitura conjunta de prioridade, faixa e usuários vulneráveis. A manobra correta começa reduzindo e preservando os espaços de travessia.', tags:['preferência','pedestre','bike']
+        }
+    ];
+
+    const PRACTICE_TEMPLATE_NAMES = {
+        signScene: 'Cena com placas', trafficLight: 'Semáforo', pedestrian: 'Pedestre', redTurn: 'Sinal vermelho',
+        rainObstacle: 'Chuva e obstáculo'
+    };
+
+    function practiceEscape(value){
+        return String(value ?? '').replace(/[&<>\"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+    }
+
+    function practiceLevelClass(difficulty){
+        const map={facil:'bg-emerald-500/10 border-emerald-500/30 text-sinalVerde',medio:'bg-sky-500/10 border-sky-500/30 text-sky-300',dificil:'bg-amber-500/10 border-amber-500/30 text-sinalAmarelo',avancado:'bg-rose-500/10 border-rose-500/30 text-rose-300'};
+        return map[difficulty] || map.medio;
+    }
+
+    function practiceVehicle(x,y,w,h,color,label,rotate=0,id=''){
+        const safeId = id ? ` id="${id}"` : '';
+        return `<g${safeId} class="practice-road-car" transform="translate(${x} ${y}) rotate(${rotate} ${w/2} ${h/2})">
+            <rect x="0" y="0" width="${w}" height="${h}" rx="6" fill="${color}" stroke="rgba(255,255,255,.18)" stroke-width="2"/>
+            <rect x="6" y="5" width="${Math.max(8,w-12)}" height="${Math.max(7,h*.28)}" rx="3" fill="rgba(15,23,42,.28)"/>
+            <text x="${w/2}" y="${h*.72}" text-anchor="middle" font-size="${Math.max(7,Math.min(11,w*.22))}" font-weight="900" fill="${color==='#ffd166'?'#121518':'#fff'}">${practiceEscape(label||'')}</text>
+        </g>`;
+    }
+
+    function practiceRoadBase({vertical=true, lanes=3, width=800, height=430}={}){
+        const roadX = vertical ? 210 : 80;
+        const roadW = vertical ? 380 : 640;
+        let lines='';
+        if(vertical){
+            for(let i=1;i<lanes;i++){
+                const x=roadX + (roadW/lanes)*i;
+                lines += `<line x1="${x}" y1="0" x2="${x}" y2="${height}" stroke="#ffd166" stroke-width="4" stroke-dasharray="14 14" opacity=".75"/>`;
+            }
+            lines += `<line x1="${roadX}" y1="0" x2="${roadX}" y2="${height}" stroke="#94a3b8" stroke-width="5"/><line x1="${roadX+roadW}" y1="0" x2="${roadX+roadW}" y2="${height}" stroke="#94a3b8" stroke-width="5"/>`;
+        }
+        return `<rect width="${width}" height="${height}" fill="#172027"/>
+            <rect x="0" y="0" width="${width}" height="${height}" fill="url(#practiceSky)" opacity=".22"/>
+            <defs><linearGradient id="practiceSky" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#24313b"/><stop offset="1" stop-color="#0f1418"/></linearGradient></defs>
+            <rect x="${roadX}" y="0" width="${roadW}" height="${height}" fill="#101418"/>
+            ${lines}`;
+    }
+
+    function generatePracticeScene(scen, state){
+        const svgHeader = `<svg viewBox="0 0 800 430" preserveAspectRatio="xMidYMid meet" aria-label="Cena interativa de trânsito">`;
+        const svgFooter = `</svg>`;
+
+        if(scen.type==='signScene'){
+            return svgHeader + `
+                ${practiceRoadBase({vertical:false})}
+                <rect x="0" y="325" width="800" height="105" fill="#2a3540" opacity=".8"/>
+                <path d="M80 250 Q400 120 720 250" fill="none" stroke="#ffd166" stroke-width="3" stroke-dasharray="12 12" opacity=".6"/>
+                <g transform="translate(120 208)" class="practice-hotspot" data-sign="cross">
+                    <rect x="0" y="0" width="105" height="140" rx="14" fill="#0f172a" stroke="#ffd166" stroke-width="3" opacity=".86"/>
+                    <line x1="28" y1="140" x2="28" y2="170" stroke="#94a3b8" stroke-width="6"/>
+                    <g transform="translate(14 12)"><rect x="18" y="18" width="58" height="58" rx="4" transform="rotate(45 47 47)" fill="#ffd166" stroke="#111827" stroke-width="6"/><path d="M47 23v48M23 47h48" stroke="#111827" stroke-width="8" stroke-linecap="round"/></g>
+                    <text x="52" y="124" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="900">INTERSEÇÃO</text>
+                </g>
+                <g transform="translate(347 198)" class="practice-hotspot" data-sign="stop">
+                    <rect x="0" y="0" width="105" height="150" rx="14" fill="#0f172a" stroke="#ef476f" stroke-width="3" opacity=".86"/>
+                    <line x1="28" y1="150" x2="28" y2="174" stroke="#94a3b8" stroke-width="6"/>
+                    <polygon points="52,18 85,32 90,65 67,96 37,96 14,65 19,32" fill="#ef476f" stroke="#fff" stroke-width="5"/>
+                    <text x="52" y="65" text-anchor="middle" fill="#fff" font-size="18" font-weight="900">PARE</text>
+                </g>
+                <g transform="translate(575 198)" class="practice-hotspot" data-sign="${scen.id==='practice_sign_03'?'speed':'curve'}">
+                    <rect x="0" y="0" width="105" height="150" rx="14" fill="#0f172a" stroke="#ffd166" stroke-width="3" opacity=".86"/>
+                    <line x1="28" y1="150" x2="28" y2="174" stroke="#94a3b8" stroke-width="6"/>
+                    ${scen.id==='practice_sign_03' ? `<circle cx="52" cy="56" r="34" fill="#fff" stroke="#ef476f" stroke-width="9"/><text x="52" y="67" text-anchor="middle" fill="#111" font-size="28" font-weight="900">60</text><text x="52" y="123" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="900">VELOCIDADE</text>` : `<rect x="18" y="18" width="68" height="68" rx="4" transform="rotate(45 52 52)" fill="#ffd166" stroke="#111827" stroke-width="6"/><path d="M30 72 Q50 42 74 55" fill="none" stroke="#111827" stroke-width="8" stroke-linecap="round"/><text x="52" y="123" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="900">CURVA</text>`}
+                </g>
+                ${practiceVehicle(292,82,95,50,'#118ab2','VOCÊ',0,'practicePlayerCar')}
+                <text x="400" y="38" text-anchor="middle" fill="#ffd166" font-size="17" font-weight="900">CLIQUE DIRETAMENTE NAS PLACAS</text>
+                <text x="400" y="62" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="700">Observe a posição, a forma e o contexto da via.</text>
+            ` + svgFooter;
+        }
+
+        if(scen.type==='crossroadTurn'){
+            const cars = scen.cars || [];
+            return svgHeader + `
+                <rect width="800" height="430" fill="#182127"/>
+                <rect x="298" y="0" width="204" height="430" fill="#101418"/>
+                <rect x="0" y="118" width="800" height="194" fill="#101418"/>
+                <line x1="400" y1="0" x2="400" y2="118" stroke="#ffd166" stroke-width="4" stroke-dasharray="12 12"/>
+                <line x1="400" y1="312" x2="400" y2="430" stroke="#ffd166" stroke-width="4" stroke-dasharray="12 12"/>
+                <line x1="0" y1="215" x2="298" y2="215" stroke="#ffd166" stroke-width="4" stroke-dasharray="12 12"/>
+                <line x1="502" y1="215" x2="800" y2="215" stroke="#ffd166" stroke-width="4" stroke-dasharray="12 12"/>
+                <path id="practiceCorrectPath" d="M400 385 C400 315 485 255 485 215" fill="none" stroke="#06d6a0" stroke-width="10" opacity="0" stroke-linecap="round" class="practice-correct-path"/>
+                <path id="practiceWrongPath" d="M400 385 C400 290 560 255 620 215" fill="none" stroke="#ef476f" stroke-width="9" opacity="0" stroke-linecap="round" class="practice-wrong-path"/>
+                <g opacity=".95"><rect x="40" y="335" width="720" height="4" fill="#334155"/><text x="52" y="359" fill="#64748b" font-size="12" font-weight="900">FAIXAS • FLUXO • USUÁRIOS VULNERÁVEIS</text></g>
+                ${cars.map(c=>`<g class="practice-hotspot" data-car-id="${practiceEscape(c.id)}">${practiceVehicle(c.x,c.y,72,42,c.color,c.id==='you'?'VOCÊ':c.id.toUpperCase(),0,`car-${c.id}`)}</g>`).join('')}
+                <g opacity=".92"><circle cx="650" cy="75" r="36" fill="#0f172a" stroke="#64748b" stroke-width="2"/><path d="M640 75h20M650 65v20" stroke="#94a3b8" stroke-width="5" stroke-linecap="round"/><text x="650" y="126" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="900">PREFERÊNCIA / ATENÇÃO</text></g>
+                <text x="400" y="34" text-anchor="middle" fill="#ffd166" font-size="18" font-weight="900">CLIQUE NO VEÍCULO QUE VOCÊ CONTROLA</text>
+            ` + svgFooter;
+        }
+
+        if(scen.type==='moveLane'){
+            const laneW = 380/3;
+            return svgHeader + `
+                ${practiceRoadBase({vertical:true,lanes:3})}
+                <rect x="470" y="62" width="100" height="95" rx="16" fill="#06d6a0" opacity=".1" stroke="#06d6a0" stroke-width="4" class="practice-pulse"/>
+                <text x="520" y="52" text-anchor="middle" fill="#06d6a0" font-size="13" font-weight="900">FAIXA-ALVO</text>
+                <text x="400" y="28" text-anchor="middle" fill="#ffd166" font-size="17" font-weight="900">ARRASTE O CARRO PARA A FAIXA CORRETA</text>
+                <g id="practiceLaneCar" class="practice-draggable" transform="translate(336 302)">
+                    <rect x="0" y="0" width="84" height="48" rx="8" fill="#118ab2" stroke="#fff" stroke-width="2"/>
+                    <rect x="10" y="7" width="64" height="14" rx="4" fill="rgba(15,23,42,.28)"/>
+                    <text x="42" y="36" text-anchor="middle" fill="#fff" font-size="12" font-weight="900">VOCÊ</text>
+                </g>
+                <g opacity=".9">${practiceVehicle(330,70,80,46,'#6b7280','SUV',0,'lane-traffic-1')}${practiceVehicle(445,175,80,46,'#f7b801','VAN',0,'lane-traffic-2')}</g>
+            ` + svgFooter;
+        }
+
+        if(scen.type==='merge'){
+            return svgHeader + `
+                <rect width="800" height="430" fill="#182127"/>
+                <rect x="90" y="155" width="620" height="170" fill="#101418"/>
+                <line x1="90" y1="240" x2="710" y2="240" stroke="#ffd166" stroke-width="4" stroke-dasharray="15 14"/>
+                <line x1="90" y1="155" x2="710" y2="155" stroke="#94a3b8" stroke-width="5"/>
+                <line x1="90" y1="325" x2="710" y2="325" stroke="#94a3b8" stroke-width="5"/>
+                <path d="M610 430 C565 360 520 315 458 240" fill="none" stroke="#64748b" stroke-width="90" opacity=".4"/>
+                <path d="M610 430 C565 360 520 315 458 240" fill="none" stroke="#101418" stroke-width="72"/>
+                <path id="mergeSafeGap" d="M570 205 L520 205" stroke="#06d6a0" stroke-width="26" stroke-linecap="round" opacity=".85" class="practice-pulse"/>
+                ${practiceVehicle(610,362,84,48,'#118ab2','VOCÊ',-28,'mergePlayer')}
+                ${practiceVehicle(465,176,84,48,'#6b7280','CARRO',0,'mergeTraffic1')}
+                ${practiceVehicle(335,258,84,48,'#f7b801','VAN',0,'mergeTraffic2')}
+                <text x="400" y="55" text-anchor="middle" fill="#ffd166" font-size="17" font-weight="900">FAIXA DE ACELERAÇÃO → ESPAÇO SEGURO</text>
+                <text x="400" y="82" text-anchor="middle" fill="#94a3b8" font-size="12" font-weight="700">Evite cortar a trajetória de quem já está na via.</text>
+            ` + svgFooter;
+        }
+
+        if(scen.type==='overtake'){
+            const solid = !scen.allowed;
+            return svgHeader + `
+                <rect width="800" height="430" fill="#182127"/>
+                <rect x="180" y="0" width="440" height="430" fill="#101418"/>
+                <line x1="400" y1="0" x2="400" y2="430" stroke="#ffd166" stroke-width="${solid?8:4}" ${solid?'':'stroke-dasharray="16 14"'} opacity=".95"/>
+                <line x1="180" y1="0" x2="180" y2="430" stroke="#94a3b8" stroke-width="6"/><line x1="620" y1="0" x2="620" y2="430" stroke="#94a3b8" stroke-width="6"/>
+                <path id="overtakePath" d="M355 320 C300 260 300 180 330 112 C355 55 385 42 420 32" fill="none" stroke="#06d6a0" stroke-width="10" opacity="0" stroke-linecap="round" class="practice-correct-path"/>
+                <path id="overtakeWrongPath" d="M355 320 C420 275 470 210 470 110" fill="none" stroke="#ef476f" stroke-width="9" opacity="0" stroke-linecap="round" class="practice-wrong-path"/>
+                ${practiceVehicle(315,282,82,48,'#118ab2','VOCÊ',0,'practiceOvertakeCar')}
+                ${practiceVehicle(426,100,90,54,'#6b7280','CAMINHÃO',0,'practiceLeadCar')}
+                ${practiceVehicle(292,35,76,44,'#f7b801','CARRO',0,'practiceOncoming')}
+                <text x="400" y="28" text-anchor="middle" fill="#ffd166" font-size="17" font-weight="900">${solid?'LINHA CONTÍNUA • NÃO INVENTE UMA PASSAGEM':'LINHA TRACEJADA • AVALIE ANTES DE EXECUTAR'}</text>
+                <g id="overtakeOutcome" class="practice-outcome"></g>
+            ` + svgFooter;
+        }
+
+        if(scen.type==='blindSpot'){
+            return svgHeader + `
+                <rect width="800" height="430" fill="#182127"/>
+                <rect x="85" y="0" width="630" height="430" fill="#101418"/>
+                <line x1="300" y1="0" x2="300" y2="430" stroke="#ffd166" stroke-width="4" stroke-dasharray="14 14"/>
+                <line x1="500" y1="0" x2="500" y2="430" stroke="#ffd166" stroke-width="4" stroke-dasharray="14 14"/>
+                ${practiceVehicle(350,284,90,54,'#118ab2','VOCÊ',0,'practiceBlindCar')}
+                ${practiceVehicle(495,175,82,48,'#06d6a0','MOTO',0,'practiceMoto')}
+                ${practiceVehicle(215,75,82,48,'#6b7280','CARRO',0,'practiceBlindTraffic')}
+                <g id="blindMirrorHotspot" class="practice-hotspot" data-blind-action="mirror">
+                    <ellipse cx="430" cy="330" rx="48" ry="26" fill="#ffd166" opacity=".12" stroke="#ffd166" stroke-width="3" class="practice-pulse"/>
+                    <text x="430" y="336" text-anchor="middle" fill="#ffd166" font-size="13" font-weight="900">PONTO CEGO</text>
+                </g>
+                <path id="blindCorrectPath" d="M395 312 C365 260 350 235 330 190" fill="none" stroke="#06d6a0" stroke-width="10" opacity="0" class="practice-correct-path"/>
+                <text x="400" y="30" text-anchor="middle" fill="#ffd166" font-size="17" font-weight="900">ANTES DE MUDAR DE FAIXA, LEIA O PONTO CEGO</text>
+            ` + svgFooter;
+        }
+
+        return svgHeader + `
+            <rect width="800" height="430" fill="#182127"/>
+            ${practiceRoadBase({vertical:false})}
+            <text x="400" y="50" text-anchor="middle" fill="#ffd166" font-size="18" font-weight="900">CENA DE TRÂNSITO</text>
+            ${practiceVehicle(338,170,95,52,'#118ab2','VOCÊ',0,'practicePlayerCar')}
+            <text x="400" y="250" text-anchor="middle" fill="#94a3b8" font-size="12">Escolha a ação que reduz o risco.</text>
+            ` + svgFooter;
+    }
+
+    function renderDecisionTemplateOverlay(scen, stepIndex){
+        const svg = document.getElementById('practiceScene');
+        if(!svg) return;
+        const body = svg.querySelector('svg');
+        if(!body) return;
+        body.querySelectorAll('[data-scene-state]').forEach(e=>e.remove());
+        let overlay='';
+        if(scen.template==='trafficLight'){
+            overlay = `<g data-scene-state="signal">
+                <rect x="610" y="72" width="50" height="142" rx="18" fill="#0f172a" stroke="#64748b" stroke-width="4"/>
+                <circle cx="635" cy="102" r="13" fill="#ef476f" opacity="${stepIndex>=0?1:.35}"/>
+                <circle cx="635" cy="143" r="13" fill="#ffd166" class="practice-pulse"/>
+                <circle cx="635" cy="184" r="13" fill="#06d6a0" opacity=".25"/>
+                ${practiceVehicle(340,215,100,54,'#118ab2','VOCÊ',0,'trafficPlayer')}
+                <text x="635" y="240" text-anchor="middle" fill="#ffd166" font-size="11" font-weight="900">AMARELO</text>
+            </g>`;
+        } else if(scen.template==='pedestrian'){
+            overlay = `<g data-scene-state="ped">
+                ${practiceVehicle(520,145,92,52,'#52525b','VAN',0,'pedVan')}
+                <rect x="470" y="280" width="210" height="48" fill="#fff" opacity=".18"/>
+                <g class="practice-pulse"><circle cx="454" cy="240" r="20" fill="#fff" opacity=".12"/><text x="454" y="248" text-anchor="middle" font-size="34">🚶</text></g>
+                ${practiceVehicle(240,285,92,52,'#118ab2','VOCÊ',0,'pedPlayer')}
+                <path d="M330 310 C380 292 404 278 454 250" fill="none" stroke="#ef476f" stroke-width="8" opacity=".22" stroke-dasharray="10 8"/>
+                <text x="390" y="92" text-anchor="middle" fill="#ffd166" font-size="17" font-weight="900">VISIBILIDADE PARCIAL</text>
+            </g>`;
+        } else if(scen.template==='redTurn'){
+            overlay = `<g data-scene-state="redTurn">
+                <rect x="370" y="52" width="56" height="150" rx="17" fill="#0f172a" stroke="#64748b" stroke-width="4"/>
+                <circle cx="398" cy="84" r="14" fill="#ef476f" class="practice-pulse"/>
+                <circle cx="398" cy="125" r="14" fill="#ffd166" opacity=".15"/>
+                <circle cx="398" cy="166" r="14" fill="#06d6a0" opacity=".12"/>
+                <rect x="480" y="55" width="190" height="90" rx="14" fill="#f8fafc" opacity=".95" stroke="#ef476f" stroke-width="5"/>
+                <text x="575" y="90" text-anchor="middle" fill="#111827" font-size="13" font-weight="900">PLACA:</text>
+                <text x="575" y="112" text-anchor="middle" fill="#111827" font-size="13" font-weight="900">NÃO HÁ PERMISSÃO</text>
+            </g>`;
+        } else if(scen.template==='rainObstacle'){
+            overlay = `<g data-scene-state="rain">
+                <g opacity=".65">${Array.from({length:18},(_,i)=>`<line x1="${30+i*42}" y1="${80+(i%4)*22}" x2="${16+i*42}" y2="${110+(i%4)*22}" stroke="#8ecae6" stroke-width="2"/>`).join('')}</g>
+                <ellipse cx="470" cy="300" rx="95" ry="28" fill="#334155" opacity=".9"/>
+                ${practiceVehicle(280,275,92,50,'#118ab2','VOCÊ',0,'rainPlayer')}
+                <text x="480" y="318" text-anchor="middle" fill="#f8fafc" font-size="28">🚴</text>
+                <path d="M180 328 C300 318 380 305 475 316" fill="none" stroke="#ef476f" stroke-width="9" opacity=".28" stroke-dasharray="12 8"/>
+                <text x="400" y="58" text-anchor="middle" fill="#ffd166" font-size="17" font-weight="900">CHUVA • OBSTÁCULO • CICLISTA</text>
+            </g>`;
+        }
+        body.insertAdjacentHTML('beforeend', overlay);
+    }
+
+    function getLegacyCategory(scen){
+        const t=(scen.topic||'').toLowerCase();
+        if(/placa|sinal|farol|luz|semáforo|pisca/.test(t)) return 'Sinalização';
+        if(/ultrapass|acostamento/.test(t)) return 'Ultrapassagem';
+        if(/prefer|rotat|cruzamento|convers|parada|estacion/.test(t)) return 'Preferência';
+        if(/pedestr|ciclist|chuva|distância|emergência|cinto|celular|álcool|segurança|buzina|pane/.test(t)) return 'Direção defensiva';
+        return 'Circulação';
+    }
+
+    function getPracticeScenario(id){ return PRACTICE_SCENARIOS.find(s=>s.id===id); }
+
+    function getPracticeErrorCount(app,id){
+        return Number(app.state.practiceErrors?.[id]) || Number(app.state.errorHistory?.[id]) || 0;
+    }
+
+    const _originalLoadState = AutoEscolaApp.prototype.loadState;
+    AutoEscolaApp.prototype.loadState = function(){
+        _originalLoadState.call(this);
+        this.state.practiceErrors = this.state.practiceErrors && typeof this.state.practiceErrors==='object' ? this.state.practiceErrors : {};
+        this.state.practiceCorrect = this.state.practiceCorrect && typeof this.state.practiceCorrect==='object' ? this.state.practiceCorrect : {};
+        this.state.practiceStats = this.state.practiceStats && typeof this.state.practiceStats==='object' ? this.state.practiceStats : {};
+        this.state.practiceCompleted = Number(this.state.practiceCompleted)||0;
+        this.state.hazardCompleted = Number(this.state.hazardCompleted)||0;
+        this.state.fullSimulationHistory = Array.isArray(this.state.fullSimulationHistory) ? this.state.fullSimulationHistory : [];
+    };
+
+    const _originalSaveState = AutoEscolaApp.prototype.saveState;
+    AutoEscolaApp.prototype.saveState = function(){
+        _originalSaveState.call(this);
+        try{ this.renderPerformancePanel?.(); this.renderMenuPerformancePanel?.(); }catch(e){ console.warn('Performance panel update skipped',e); }
+    };
+
+    const _originalShowScreen = AutoEscolaApp.prototype.showScreen;
+    AutoEscolaApp.prototype.showScreen = function(screenId){
+        _originalShowScreen.call(this,screenId);
+        if(screenId==='screen-performance') this.renderPerformancePanel();
+        if(screenId==='screen-errors') this.renderErrorNotebook();
+    };
+
+    AutoEscolaApp.prototype.practiceRecordStep = function(scen, correct){
+        const category=scen.category || 'Circulação';
+        if(!this.state.practiceStats[category]) this.state.practiceStats[category]={attempts:0,correct:0};
+        this.state.practiceStats[category].attempts += 1;
+        if(correct) this.state.practiceStats[category].correct += 1;
+    };
+
+    AutoEscolaApp.prototype.practiceAward = function(scen, correct){
+        const id=scen.id;
+        const category=scen.category || 'Circulação';
+        if(!this.state.practiceStats[category]) this.state.practiceStats[category]={attempts:0,correct:0};
+        this.state.practiceStats[category].attempts += 1;
+        if(correct) this.state.practiceStats[category].correct += 1;
+
+        if(correct){
+            this.state.practiceCorrect[id]=(Number(this.state.practiceCorrect[id])||0)+1;
+            this.state.correctHistory[id]=(Number(this.state.correctHistory[id])||0)+1;
+            delete this.state.errorHistory[id];
+            delete this.state.practiceErrors[id];
+            this.state.streak=(Number(this.state.streak)||0)+1;
+            const xp = 60 + (scen.difficulty==='avancado'?20:scen.difficulty==='dificil'?10:0);
+            const coins = 24 + (scen.difficulty==='avancado'?8:scen.difficulty==='dificil'?4:0);
+            this.state.xp=Math.max(0,Math.floor(Number(this.state.xp)||0)+xp);
+            this.state.coins=Math.max(0,Math.floor(Number(this.state.coins)||0)+coins);
+            this.state.practiceCompleted += 1;
+            if(this.state.streak>=5) this.unlockTrophy('tr_streak');
+        } else {
+            this.state.practiceErrors[id]=(Number(this.state.practiceErrors[id])||0)+1;
+            this.state.errorHistory[id]=(Number(this.state.errorHistory[id])||0)+1;
+            this.state.streak=0;
+        }
+        this.checkPracticeTrophies();
+        this.saveState();
+    };
+
+    AutoEscolaApp.prototype.checkPracticeTrophies = function(){
+        const correctFor = type => PRACTICE_SCENARIOS.filter(s=>s.type===type).reduce((sum,s)=>sum+(Number(this.state.practiceCorrect[s.id])||0),0);
+        const signCorrect = PRACTICE_SCENARIOS.filter(s=>s.type==='signScene').reduce((sum,s)=>sum+(Number(this.state.practiceCorrect[s.id])||0),0);
+        const crossCorrect = PRACTICE_SCENARIOS.filter(s=>s.type==='crossroadTurn').reduce((sum,s)=>sum+(Number(this.state.practiceCorrect[s.id])||0),0);
+        const overCorrect = PRACTICE_SCENARIOS.filter(s=>s.type==='overtake').reduce((sum,s)=>sum+(Number(this.state.practiceCorrect[s.id])||0),0);
+        if(signCorrect>=3) this.unlockTrophy('tr_interactive_signs');
+        if(crossCorrect>=3) this.unlockTrophy('tr_interactive_cross');
+        if(overCorrect>=2) this.unlockTrophy('tr_interactive_overtake');
+        if((Number(this.state.hazardCompleted)||0)>=3) this.unlockTrophy('tr_interactive_hazards');
+        const diffDone = ['facil','medio','dificil','avancado'].every(d=>PRACTICE_SCENARIOS.some(s=>s.difficulty===d && (Number(this.state.practiceCorrect[s.id])||0)>0));
+        if(diffDone) this.unlockTrophy('tr_interactive_master');
+    };
+
+    AutoEscolaApp.prototype.startPractice = function(difficulty='medio'){
+        const pool=PRACTICE_SCENARIOS.filter(s=>s.difficulty===difficulty);
+        if(!pool.length) return;
+        this.practiceSession={ mode:'practice', difficulty, queue:[...pool].sort(()=>Math.random()-.5), index:0, stepIndex:0, selectedCar:null, selectedSign:null, stageState:{}, results:[] };
+        this.loadPracticeScenario();
+        this.showScreen('screen-practice');
+    };
+
+    AutoEscolaApp.prototype.startFullSimulation = function(){
+        const legacyPool=[...SCENARIOS].sort(()=>Math.random()-.5).slice(0,5);
+        const practicePool=[...PRACTICE_SCENARIOS].sort(()=>Math.random()-.5).slice(0,7);
+        const queue=[...practicePool,...legacyPool].sort(()=>Math.random()-.5);
+        this.practiceSession={ mode:'full-sim', difficulty:'misto', queue, index:0, stepIndex:0, selectedCar:null, selectedSign:null, stageState:{}, results:[] };
+        this.loadPracticeScenario();
+        this.showScreen('screen-practice');
+    };
+
+    AutoEscolaApp.prototype.reviewScenario = function(id){
+        const practice=getPracticeScenario(id);
+        if(practice){
+            this.practiceSession={ mode:'review', difficulty:practice.difficulty, queue:[practice], index:0, stepIndex:0, selectedCar:null, selectedSign:null, stageState:{}, results:[] };
+            this.loadPracticeScenario();
+            this.showScreen('screen-practice');
+            return;
+        }
+        const idx=SCENARIOS.findIndex(s=>s.id===id);
+        if(idx>=0){
+            this.state.currentMode='jornada';
+            this.state.currentScenarioIndex=idx;
+            document.getElementById('quizModeTitle').innerText='REVISÃO DO CADERNO';
+            this.loadCurrentScenario();
+            this.showScreen('screen-quiz');
+        }
+    };
+
+    AutoEscolaApp.prototype.reviewSimilar = function(id){
+        const source=getPracticeScenario(id) || SCENARIOS.find(s=>s.id===id);
+        const cat=source?.category || getLegacyCategory(source||{});
+        const practiceSame=PRACTICE_SCENARIOS.filter(s=>s.category===cat && s.id!==id).sort((a,b)=>getPracticeErrorCount(this,b.id)-getPracticeErrorCount(this,a.id));
+        if(practiceSame[0]){ this.reviewScenario(practiceSame[0].id); return; }
+        const legacySame=SCENARIOS.filter(s=>getLegacyCategory(s)===cat && s.id!==id);
+        if(legacySame[0]) this.reviewScenario(legacySame[0].id);
+    };
+
+    AutoEscolaApp.prototype.practiceSceneHint = function(text){
+        const hint=document.getElementById('practiceStepHint'); if(hint) hint.innerText=text||'';
+    };
+
+    AutoEscolaApp.prototype.renderPracticeHeader = function(scen){
+        const sess=this.practiceSession;
+        document.getElementById('practiceDifficultyBadge').innerText = sess.mode==='full-sim' ? 'SIMULADO COMPLETO' : (PRACTICE_DIFFICULTY_LABELS[scen.difficulty]||'Prática');
+        document.getElementById('practiceDifficultyBadge').className=`px-2.5 py-1 rounded-md border text-[10px] font-black uppercase ${practiceLevelClass(scen.difficulty)}`;
+        document.getElementById('practiceCategoryBadge').innerText=scen.category||getLegacyCategory(scen);
+        document.getElementById('practiceArticleBadge').innerText=scen.article||'CTB';
+        document.getElementById('practiceTitle').innerText=scen.title;
+        document.getElementById('practiceDescription').innerText=scen.description;
+        document.getElementById('practiceProgressText').innerText=`Situação ${sess.index+1} de ${sess.queue.length}`;
+        document.getElementById('practiceStreak').innerText=this.state.streak;
+    };
+
+    AutoEscolaApp.prototype.loadPracticeScenario = function(){
+        const sess=this.practiceSession;
+        if(!sess || sess.index>=sess.queue.length){ this.finishFullPractice(); return; }
+        const scen=sess.queue[sess.index];
+        sess.stepIndex=0; sess.selectedCar=null; sess.selectedSign=null; sess.stageState={};
+        this.renderPracticeHeader(scen);
+        const scene=document.getElementById('practiceScene');
+        const actions=document.getElementById('practiceActions');
+        const feedback=document.getElementById('practiceFeedback');
+        const bottom=document.getElementById('practiceBottomActions');
+        scene.innerHTML=''; actions.innerHTML=''; feedback.className='hidden mt-4 rounded-xl border p-4'; feedback.innerHTML=''; bottom.innerHTML='';
+
+        if(!scen.type){ this.renderPracticeLegacy(scen); return; }
+        scene.innerHTML=generatePracticeScene(scen,sess.stageState);
+        this.practiceStepHint('Interaja com a cena ou use os controles abaixo.');
+
+        if(scen.type==='signScene') return this.bindPracticeSignScene(scen);
+        if(scen.type==='crossroadTurn') return this.bindPracticeCrossroad(scen);
+        if(scen.type==='moveLane') return this.bindPracticeMoveLane(scen);
+        if(scen.type==='overtake') return this.bindPracticeSteps(scen);
+        if(scen.type==='blindSpot') return this.bindPracticeSteps(scen);
+        if(scen.type==='merge') return this.renderMergeControls(scen);
+        if(scen.type==='decision'){
+            renderDecisionTemplateOverlay(scen,0);
+            return this.bindPracticeSteps(scen);
+        }
+    };
+
+    AutoEscolaApp.prototype.renderPracticeLegacy = function(scen){
+        const scene=document.getElementById('practiceScene');
+        const actions=document.getElementById('practiceActions');
+        const feedback=document.getElementById('practiceFeedback');
+        scene.innerHTML=generateScenarioSVG(scen);
+        document.getElementById('practicePrompt').innerText=scen.title;
+        document.getElementById('practiceStepHint').innerText='Questão do conteúdo original, apresentada dentro do novo modo de simulado.';
+        actions.innerHTML=(scen.options||[]).map((o,i)=>`<button data-legacy-opt="${i}" class="p-3 rounded-xl bg-asfaltoCard border border-slate-700 hover:border-sinalAmarelo text-left text-xs font-bold text-slate-200 transition-all">${practiceEscape(o.text)}</button>`).join('');
+        actions.querySelectorAll('[data-legacy-opt]').forEach(btn=>btn.addEventListener('click',()=>{
+            const opt=scen.options[Number(btn.dataset.legacyOpt)];
+            this.resolvePracticeStep(scen, !!opt.correct, opt.text, opt.correct ? scen.explanation : scen.explanation, true);
+        }));
+    };
+
+    AutoEscolaApp.prototype.bindPracticeSignScene = function(scen){
+        const actions=document.getElementById('practiceActions');
+        document.getElementById('practicePrompt').innerText=scen.prompt;
+        const svg=document.getElementById('practiceScene');
+        svg.querySelectorAll('[data-sign]').forEach(el=>el.addEventListener('click',()=>{
+            const sign=el.dataset.sign;
+            document.querySelectorAll('[data-sign]').forEach(x=>x.classList.remove('selected'));
+            el.classList.add('selected');
+            this.practiceSession.selectedSign=sign;
+            actions.innerHTML='<div class="col-span-full text-xs text-slate-400 font-bold">Agora interprete o significado:</div>' + scen.meanings.map(m=>`<button data-meaning="${m.id}" class="p-3 rounded-xl bg-asfaltoCard border border-slate-700 hover:border-sinalAmarelo text-left text-xs font-bold text-slate-200">${practiceEscape(m.text)}</button>`).join('');
+            actions.querySelectorAll('[data-meaning]').forEach(btn=>btn.addEventListener('click',()=>{
+                const correct=this.practiceSession.selectedSign===scen.correctSign && btn.dataset.meaning===scen.correctSign;
+                this.resolvePracticeStep(scen,correct,btn.innerText,scen.explanation,false);
+            }));
+            this.practiceStepHint('A placa foi selecionada. Agora interprete o que ela significa.');
+        }));
+    };
+
+    AutoEscolaApp.prototype.bindPracticeCrossroad = function(scen){
+        const actions=document.getElementById('practiceActions');
+        document.getElementById('practicePrompt').innerText=scen.prompt;
+        actions.innerHTML='<div class="col-span-full text-xs text-slate-400 font-bold">1. Clique no seu carro dentro da cena.</div>';
+        document.getElementById('practiceScene').querySelectorAll('[data-car-id]').forEach(el=>el.addEventListener('click',()=>{
+            const id=el.dataset.carId;
+            document.querySelectorAll('[data-car-id]').forEach(x=>x.classList.remove('selected'));
+            el.classList.add('selected');
+            if(id!=='you'){
+                this.practiceStepHint('Esse é outro participante. Clique no carro azul indicado como VOCÊ.'); return;
+            }
+            this.practiceSession.selectedCar='you';
+            actions.innerHTML='<div class="col-span-full text-xs text-slate-400 font-bold">2. Escolha a ação para o seu carro:</div>' + scen.turnOptions.map(o=>`<button data-turn="${o.id}" class="p-3 rounded-xl bg-asfaltoCard border border-slate-700 hover:border-sinalAmarelo text-left text-xs font-bold text-slate-200">${o.text}</button>`).join('');
+            actions.querySelectorAll('[data-turn]').forEach(btn=>btn.addEventListener('click',()=>{
+                const correct=btn.dataset.turn===scen.correctTurn;
+                this.resolvePracticeStep(scen,correct,btn.innerText,scen.explanation,false);
+            }));
+            this.practiceStepHint('Seu veículo está selecionado. Execute a trajetória compatível com a cena.');
+        }));
+    };
+
+    AutoEscolaApp.prototype.renderMergeControls = function(scen){
+        const actions=document.getElementById('practiceActions');
+        document.getElementById('practicePrompt').innerText=scen.prompt;
+        actions.innerHTML=scen.mergeOptions.map(o=>`<button data-merge="${o.id}" class="p-3 rounded-xl bg-asfaltoCard border border-slate-700 hover:border-sinalAmarelo text-left text-xs font-bold text-slate-200">${o.text}</button>`).join('');
+        document.getElementById('mergeSafeGap')?.addEventListener('click',()=>{ this.practiceStepHint('Esse espaço representa o intervalo seguro. Use a faixa de aceleração e entre sem cortar o fluxo.'); });
+        actions.querySelectorAll('[data-merge]').forEach(btn=>btn.addEventListener('click',()=>{
+            const correct=btn.dataset.merge===scen.correctMerge;
+            this.resolvePracticeStep(scen,correct,btn.innerText,scen.explanation,false);
+        }));
+    };
+
+    AutoEscolaApp.prototype.bindPracticeMoveLane = function(scen){
+        const actions=document.getElementById('practiceActions');
+        document.getElementById('practicePrompt').innerText=scen.prompt;
+        actions.innerHTML='<div class="col-span-full text-xs text-slate-400 font-bold">Use o toque/ponteiro para arrastar o carro. Ele pode ser solto diretamente sobre a faixa-alvo.</div><button id="btnCheckLane" class="col-span-full p-3 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-300 font-black text-xs">Verificar posicionamento</button>';
+        const car=document.getElementById('practiceLaneCar');
+        const scene=document.getElementById('practiceScene').querySelector('svg');
+        let dragging=false, pos={x:336,y:302};
+        const getPoint=e=>{
+            const rect=scene.getBoundingClientRect();
+            return {x:(e.clientX-rect.left)/rect.width*800, y:(e.clientY-rect.top)/rect.height*430};
+        };
+        const move=e=>{ if(!dragging) return; const p=getPoint(e); pos.x=Math.max(214,Math.min(504,pos.x+(p.x-pos.x)*.35)); pos.y=Math.max(55,Math.min(360,pos.y+(p.y-pos.y)*.35)); car.setAttribute('transform',`translate(${pos.x-42} ${pos.y-24})`); };
+        car.addEventListener('pointerdown',e=>{dragging=true;car.classList.add('dragging');car.setPointerCapture?.(e.pointerId);});
+        scene.addEventListener('pointermove',move);
+        const end=()=>{dragging=false;car.classList.remove('dragging');};
+        scene.addEventListener('pointerup',end); scene.addEventListener('pointercancel',end);
+        document.getElementById('btnCheckLane').onclick=()=>{
+            // The target is the rightmost lane: center x must be in final third of road.
+            const correct=pos.x>465;
+            this.resolvePracticeStep(scen,correct,'Posição da faixa',scen.explanation,false);
+        };
+    };
+
+    AutoEscolaApp.prototype.bindPracticeSteps = function(scen){
+        const actions=document.getElementById('practiceActions');
+        const stepIndex=this.practiceSession.stepIndex||0;
+        const steps=scen.steps||[];
+        if(!steps.length) return;
+        const step=steps[stepIndex];
+        document.getElementById('practicePrompt').innerText=step.question;
+        this.practiceStepHint(`Etapa ${stepIndex+1} de ${steps.length} — complete a sequência com segurança.`);
+        if(scen.type==='blindSpot' && stepIndex===0){
+            const mirror=document.getElementById('blindMirrorHotspot');
+            mirror?.addEventListener('click',()=>{ mirror.classList.remove('practice-pulse'); mirror.setAttribute('opacity','1'); this.practiceStepHint('Você conferiu o ponto cego. Agora escolha a ação para continuar.'); });
+        }
+        if(scen.type==='overtake' && stepIndex===0){
+            const p=document.getElementById('overtakePath'); if(p) p.setAttribute('opacity',scen.allowed?'0.35':'0');
+            const w=document.getElementById('overtakeWrongPath'); if(w) w.setAttribute('opacity',scen.allowed?'0':'0.18');
+        }
+        if(scen.type==='decision'){
+            renderDecisionTemplateOverlay(scen,stepIndex);
+        }
+        actions.innerHTML=step.options.map(o=>`<button data-step-option="${o.id}" class="p-3 rounded-xl bg-asfaltoCard border border-slate-700 hover:border-sinalAmarelo text-left text-xs font-bold text-slate-200">${o.text}</button>`).join('');
+        actions.querySelectorAll('[data-step-option]').forEach(btn=>btn.addEventListener('click',()=>{
+            const correct=btn.dataset.stepOption===step.correct;
+            this.resolvePracticeStep(scen,correct,btn.innerText,step.explanation,false);
+        }));
+    };
+
+    AutoEscolaApp.prototype.resolvePracticeStep = function(scen,correct,chosen,explanation,isLegacy=false){
+        const feedback=document.getElementById('practiceFeedback');
+        const actions=document.getElementById('practiceActions');
+        actions.querySelectorAll('button').forEach(b=>b.disabled=true);
+        this.animatePracticeOutcome(scen,correct);
+
+        if(correct){
+            // Intermediate steps count as learning attempts, but XP/streak are awarded once per completed situation.
+            if(!isLegacy && scen.steps && ((this.practiceSession.stepIndex||0)+1 < scen.steps.length)){
+                this.practiceRecordStep(scen,true);
+                feedback.className='mt-4 rounded-xl border border-sinalVerde bg-emerald-500/10 p-4';
+                feedback.innerHTML=`<div class="font-black text-sinalVerde text-sm">✅ Etapa correta</div><div class="text-xs text-slate-300 mt-1">${practiceEscape(explanation)}</div>`;
+                const bottom=document.getElementById('practiceBottomActions');
+                bottom.innerHTML=`<button class="w-full bg-sinalVerde hover:brightness-110 text-asfalto font-black py-3 rounded-xl text-sm">Continuar sequência →</button>`;
+                bottom.querySelector('button').onclick=()=>{
+                    this.practiceSession.stepIndex=(this.practiceSession.stepIndex||0)+1;
+                    this.loadCurrentPracticeStepOnly(scen);
+                };
+                this.saveState();
+                return;
+            }
+
+            if(!this.practiceSession.stageState.resultRecorded){
+                this.practiceSession.results.push({id:scen.id,correct:true,category:scen.category||getLegacyCategory(scen)});
+                this.practiceSession.stageState.resultRecorded=true;
+            }
+            if(isLegacy){
+                this.practiceAward(scen,true);
+                feedback.className='mt-4 rounded-xl border border-sinalVerde bg-emerald-500/10 p-4';
+                feedback.innerHTML=`<div class="font-black text-sinalVerde text-sm">✅ Correto</div><div class="text-xs text-slate-300 mt-1">${practiceEscape(scen.explanation)}</div>`;
+                return this.renderPracticeContinueButton();
+            }
+
+            this.practiceAward(scen,true);
+            feedback.className='mt-4 rounded-xl border border-sinalVerde bg-emerald-500/10 p-4';
+            feedback.innerHTML=`<div class="font-black text-sinalVerde text-sm">✅ Situação concluída corretamente</div><div class="text-xs text-slate-300 mt-1">${practiceEscape(explanation || scen.explanation)}</div>`;
+            this.renderPracticeContinueButton();
+        } else {
+            if(!this.practiceSession.stageState.failedRecorded){
+                this.practiceAward(scen,false);
+                this.practiceSession.stageState.failedRecorded=true;
+            } else {
+                this.practiceRecordStep(scen,false);
+            }
+            if(!this.practiceSession.stageState.resultRecorded){
+                this.practiceSession.results.push({id:scen.id,correct:false,category:scen.category||getLegacyCategory(scen)});
+                this.practiceSession.stageState.resultRecorded=true;
+            }
+            feedback.className='mt-4 rounded-xl border border-sinalVermelho bg-rose-500/10 p-4';
+            feedback.innerHTML=`<div class="font-black text-sinalVermelho text-sm">⚠️ Essa escolha criaria risco</div><div class="text-xs text-slate-300 mt-1">${practiceEscape(explanation || scen.explanation)}</div><div class="text-[11px] text-slate-400 mt-2"><strong>Você escolheu:</strong> ${practiceEscape(chosen)}<br><strong>Depois:</strong> a cena mostra a consequência e a trajetória segura.</div>`;
+            const bottom=document.getElementById('practiceBottomActions');
+            bottom.innerHTML=`<div class="grid grid-cols-1 sm:grid-cols-2 gap-2"><button id="btnPracticeRetry" class="w-full bg-sinalAmarelo hover:bg-amber-400 text-asfalto font-black py-3 rounded-xl text-sm">Refazer a situação</button><button id="btnPracticeContinue" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 font-black py-3 rounded-xl text-sm">Ver outra situação</button></div>`;
+            document.getElementById('btnPracticeRetry').onclick=()=>{
+                this.practiceSession.stepIndex=0;
+                // Keep the failure/result markers: the scenario was already counted as a missed situation.
+                this.loadCurrentPracticeStepOnly(scen);
+            };
+            document.getElementById('btnPracticeContinue').onclick=()=>this.advancePracticeScenario();
+        }
+    };
+
+    AutoEscolaApp.prototype.loadCurrentPracticeStepOnly = function(scen){
+        const scene=document.getElementById('practiceScene');
+        const actions=document.getElementById('practiceActions');
+        const feedback=document.getElementById('practiceFeedback');
+        const bottom=document.getElementById('practiceBottomActions');
+        actions.innerHTML=''; feedback.className='hidden mt-4 rounded-xl border p-4'; feedback.innerHTML=''; bottom.innerHTML='';
+        if(scen.type==='overtake') scene.innerHTML=generatePracticeScene(scen,this.practiceSession.stageState);
+        else if(scen.type==='blindSpot') scene.innerHTML=generatePracticeScene(scen,this.practiceSession.stageState);
+        else if(scen.type==='decision') scene.innerHTML=generatePracticeScene(scen,this.practiceSession.stageState);
+        if(scen.type==='overtake' || scen.type==='blindSpot' || scen.type==='decision') this.bindPracticeSteps(scen);
+    };
+
+    AutoEscolaApp.prototype.animatePracticeOutcome = function(scen,correct){
+        const svg=document.getElementById('practiceScene')?.querySelector('svg'); if(!svg) return;
+        const stepIndex=this.practiceSession?.stepIndex||0;
+        svg.querySelectorAll('[id]').forEach(e=>e.classList.remove('practice-shake'));
+        const target=svg.querySelector('#practiceOvertakeCar,#practicePlayerCar,#practiceLaneCar,#practiceBlindCar,#rainPlayer,#mergePlayer');
+
+        if(!correct){
+            if(target) target.classList.add('practice-shake');
+            const path=svg.querySelector('#overtakeWrongPath,#practiceWrongPath'); if(path) path.setAttribute('opacity','.9');
+            const old=svg.querySelector('.practice-outcome'); old?.remove();
+            const outcome=document.createElementNS('http://www.w3.org/2000/svg','g');
+            outcome.classList.add('practice-outcome');
+            let title='⚠️ CONFLITO DE TRAJETÓRIAS';
+            let sub='Essa decisão reduz seu espaço de reação.';
+            if(scen.type==='signScene'){ title='⚠️ LEITURA INCORRETA DA PLACA'; sub='Observe a forma e o significado antes de agir.'; }
+            if(scen.type==='decision'){ title='⚠️ DECISÃO DE RISCO'; sub='A cena demonstra a consequência e depois a conduta segura.'; }
+            if(scen.type==='overtake' && !scen.allowed){ title='🚫 ULTRAPASSAGEM PROBLEMÁTICA'; sub='A sinalização e a visibilidade não autorizam a manobra apresentada.'; }
+            outcome.innerHTML=`<rect x="180" y="70" width="440" height="76" rx="18" fill="#ef476f" fill-opacity=".14" stroke="#ef476f" stroke-width="3"/><text x="400" y="104" text-anchor="middle" fill="#ef476f" font-size="18" font-weight="900">${title}</text><text x="400" y="128" text-anchor="middle" fill="#fecdd3" font-size="12" font-weight="700">${sub}</text>`;
+            svg.appendChild(outcome);
+            if(scen.type==='signScene'){
+                const correctSign=svg.querySelector(`[data-sign="${scen.correctSign}"]`);
+                correctSign?.classList.add('selected');
+            }
+            setTimeout(()=>outcome.remove(),1500);
+            setTimeout(()=>{
+                const cp=svg.querySelector('#overtakePath,#practiceCorrectPath,#blindCorrectPath'); if(cp) cp.setAttribute('opacity','.95');
+            },550);
+            return;
+        }
+
+        // Successful actions visibly demonstrate the safe trajectory.
+        const cp=svg.querySelector('#overtakePath,#practiceCorrectPath,#blindCorrectPath'); if(cp) cp.setAttribute('opacity','.95');
+        if(scen.type==='overtake'){
+            const car=svg.querySelector('#practiceOvertakeCar');
+            if(car){
+                car.style.animation = stepIndex===1 ? 'practiceDriveLeft .75s ease both' : stepIndex===2 ? 'practiceDriveRight .75s ease both' : 'practiceDriveAhead .65s ease both';
+                setTimeout(()=>{car.style.animation='';},850);
+            }
+        }
+        if(scen.type==='crossroadTurn' && (scen.correctTurn==='right' || scen.correctTurn==='rightWait')){
+            const car=svg.querySelector('#car-you');
+            if(car){ car.style.animation='practiceDriveRight .75s ease both'; setTimeout(()=>car.style.animation='',850); }
+        }
+        if(scen.type==='merge'){
+            const car=svg.querySelector('#mergePlayer');
+            if(car){ car.style.animation='practiceDriveLeft .75s ease both'; setTimeout(()=>car.style.animation='',850); }
+        }
+        const old=svg.querySelector('.practice-outcome'); old?.remove();
+        const outcome=document.createElementNS('http://www.w3.org/2000/svg','g'); outcome.classList.add('practice-outcome');
+        outcome.innerHTML=`<rect x="245" y="72" width="310" height="58" rx="18" fill="#06d6a0" fill-opacity=".14" stroke="#06d6a0" stroke-width="3"/><text x="400" y="107" text-anchor="middle" fill="#06d6a0" font-size="18" font-weight="900">✓ TRAJETÓRIA SEGURA</text>`;
+        svg.appendChild(outcome); setTimeout(()=>outcome.remove(),1100);
+    };
+
+    AutoEscolaApp.prototype.renderPracticeContinueButton = function(){
+        const bottom=document.getElementById('practiceBottomActions');
+        bottom.innerHTML=`<button class="w-full bg-sinalAmarelo hover:bg-amber-400 text-asfalto font-black py-3 rounded-xl text-sm">Próxima situação <i class="fa-solid fa-arrow-right ml-1"></i></button>`;
+        bottom.querySelector('button').onclick=()=>this.advancePracticeScenario();
+    };
+
+    AutoEscolaApp.prototype.advancePracticeScenario = function(){
+        this.practiceSession.index += 1;
+        this.loadPracticeScenario();
+    };
+
+    AutoEscolaApp.prototype.finishFullPractice = function(){
+        const sess=this.practiceSession;
+        if(!sess) return;
+        const results=sess.results||[];
+        const total=sess.queue.length;
+        const correct=results.filter(r=>r.correct).length;
+        const errorByCat={};
+        results.filter(r=>!r.correct).forEach(r=>{errorByCat[r.category]=(errorByCat[r.category]||0)+1;});
+        // Because failed attempts can be retried, derive misses from persistent session fields if needed.
+        const attempts=[];
+        results.forEach(r=>attempts.push(r));
+        const errorEntries=Object.entries(errorByCat).sort((a,b)=>b[1]-a[1]);
+        this.state.fullSimulationHistory.push({date:new Date().toISOString(),total,correct,errorByCat});
+        this.saveState();
+
+        const scene=document.getElementById('practiceScene');
+        const actions=document.getElementById('practiceActions');
+        const bottom=document.getElementById('practiceBottomActions');
+        const feedback=document.getElementById('practiceFeedback');
+        document.getElementById('practiceTitle').innerText=sess.mode==='full-sim'?'🎯 Resultado do Simulado Completo':'📚 Revisão concluída';
+        document.getElementById('practiceDescription').innerText=`Você concluiu ${total} situações. O resultado considera as decisões finais registradas na sessão.`;
+        scene.innerHTML=`<svg viewBox="0 0 800 360" class="w-full h-full"><rect width="800" height="360" fill="#121518"/><circle cx="400" cy="155" r="78" fill="#272d36" stroke="#ffd166" stroke-width="5"/><text x="400" y="150" text-anchor="middle" fill="#ffd166" font-size="38" font-weight="900">${correct}/${total}</text><text x="400" y="178" text-anchor="middle" fill="#fff" font-size="14" font-weight="800">SITUAÇÕES CORRETAS</text><path d="M325 245h150" stroke="#06d6a0" stroke-width="8" stroke-linecap="round"/><text x="400" y="275" text-anchor="middle" fill="#94a3b8" font-size="13">Continue usando o Caderno de Revisão para repetir os pontos difíceis.</text></svg>`;
+        actions.innerHTML=`<div class="col-span-full p-4 rounded-xl bg-asfaltoCard border border-slate-700"><div class="text-xs font-black text-slate-300 mb-2">Categorias com mais erros</div>${errorEntries.length?errorEntries.map(([cat,n])=>`<div class="flex items-center justify-between text-xs py-1"><span class="text-slate-300">${practiceEscape(cat)}</span><span class="font-black text-sinalVermelho">${n}</span></div>`).join(''):'<div class="text-xs text-sinalVerde font-bold">Nenhuma categoria acumulou erro nesta sessão.</div>'}</div>`;
+        feedback.className='mt-4 rounded-xl border border-slate-700 bg-slate-900/70 p-4';
+        feedback.innerHTML=`<div class="font-black text-white text-sm">📊 Leitura do resultado</div><div class="text-xs text-slate-300 mt-1">${correct===total?'Excelente consistência! Você finalizou a sessão sem erros registrados.':`Use o Caderno de Revisão para priorizar ${practiceEscape(errorEntries[0]?.[0]||'as situações que mais geraram dúvida')}.`}</div>`;
+        bottom.innerHTML=`<div class="grid grid-cols-1 sm:grid-cols-2 gap-2"><button id="btnPracticeBack" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 font-black py-3 rounded-xl text-sm">Voltar ao menu</button><button id="btnPracticeErrors" class="w-full bg-sinalAmarelo hover:bg-amber-400 text-asfalto font-black py-3 rounded-xl text-sm">Revisar erros</button></div>`;
+        document.getElementById('btnPracticeBack').onclick=()=>this.showScreen('screen-menu');
+        document.getElementById('btnPracticeErrors').onclick=()=>this.showScreen('screen-errors');
+    };
+
+    AutoEscolaApp.prototype.renderPerformancePanel = function(){
+        const full=document.getElementById('performanceDetailedPanel');
+        const menu=document.getElementById('menuPerformancePanel');
+        const all=[...SCENARIOS,...PRACTICE_SCENARIOS];
+        const stats=PRACTICE_CATEGORY_ORDER.map(cat=>{
+            let attempts=0,correct=0,errors=0;
+            const ps=this.state.practiceStats?.[cat];
+            if(ps){attempts+=Number(ps.attempts)||0;correct+=Number(ps.correct)||0;errors+=Math.max(0,attempts-correct);}
+            SCENARIOS.filter(s=>getLegacyCategory(s)===cat).forEach(s=>{
+                correct+=Number(this.state.correctHistory?.[s.id])||0;
+                errors+=Number(this.state.errorHistory?.[s.id])||0;
+                attempts+= (Number(this.state.correctHistory?.[s.id])||0)+(Number(this.state.errorHistory?.[s.id])||0);
+            });
+            PRACTICE_SCENARIOS.filter(s=>s.category===cat && !this.state.practiceStats?.[cat]).forEach(s=>{
+                correct+=Number(this.state.practiceCorrect?.[s.id])||0;
+                errors+=Number(this.state.practiceErrors?.[s.id])||0;
+                attempts+=(Number(this.state.practiceCorrect?.[s.id])||0)+(Number(this.state.practiceErrors?.[s.id])||0);
+            });
+            const pct=attempts?Math.round((correct/attempts)*100):0;
+            return {cat,attempts,correct,errors,pct};
+        });
+        const renderCard=(s,compact=false)=>`<div class="glass-card rounded-2xl p-4 border border-slate-700/70 ${s.attempts?'':'opacity-70'}">
+            <div class="flex items-start justify-between gap-2"><div class="text-xs font-black text-white">${practiceEscape(s.cat)}</div><div class="text-xs font-black ${s.pct>=80?'text-sinalVerde':s.pct>=60?'text-sinalAmarelo':'text-sinalVermelho'}">${s.pct}%</div></div>
+            <div class="h-2 rounded-full bg-slate-900 overflow-hidden border border-slate-800 mt-3"><div class="h-full bg-gradient-to-r from-cnhAzul via-sinalVerde to-sinalAmarelo" style="width:${s.pct}%"></div></div>
+            <div class="flex justify-between mt-2 text-[10px] font-bold text-slate-500"><span>${s.correct} acertos</span><span>${s.errors} erros</span></div>
+        </div>`;
+        if(full){ full.innerHTML=stats.map(s=>renderCard(s)).join(''); }
+        if(menu){ menu.innerHTML=stats.map(s=>`<div class="rounded-xl bg-slate-900/70 border border-slate-700 p-3"><div class="flex justify-between items-center"><span class="text-[11px] font-black text-slate-300">${practiceEscape(s.cat)}</span><span class="text-sm font-black ${s.pct>=80?'text-sinalVerde':s.pct>=60?'text-sinalAmarelo':'text-sinalVermelho'}">${s.pct}%</span></div><div class="h-1.5 bg-slate-800 rounded-full mt-2 overflow-hidden"><div class="h-full bg-gradient-to-r from-cnhAzul via-sinalVerde to-sinalAmarelo" style="width:${s.pct}%"></div></div></div>`).join(''); }
+        const focus=stats.filter(s=>s.attempts).sort((a,b)=>a.pct-b.pct)[0] || stats[0];
+        const title=document.getElementById('performanceFocusTitle'), textEl=document.getElementById('performanceFocusText');
+        if(title) title.innerText=focus && focus.attempts ? `Prioridade: ${focus.cat}` : 'Comece sua primeira prática';
+        if(textEl) textEl.innerText=focus && focus.attempts ? `Domínio aproximado de ${focus.pct}%, com ${focus.errors} erro(s) registrados. Refazer situações desse grupo ajuda a consolidar a decisão.` : 'As barras ficam mais precisas conforme você registra mais decisões e revisões.';
+        const c=document.getElementById('practiceCompletedCount'); if(c) c.innerText=Number(this.state.practiceCompleted)||0;
+        const ct=document.getElementById('practiceCompletedText'); if(ct) ct.innerText='As situações corretas são cumulativas e complementam seu histórico existente.';
+    };
+
+    // Enhanced Caderno: prioritize frequent errors and make every item re-playable.
+    const _originalRenderErrorNotebook = AutoEscolaApp.prototype.renderErrorNotebook;
+    AutoEscolaApp.prototype.renderErrorNotebook = function(){
+        const container=document.getElementById('errorNotebookContent'); if(!container) return;
+        const entries=[];
+        Object.entries(this.state.errorHistory||{}).forEach(([id,count])=>{
+            const s=getPracticeScenario(id)||SCENARIOS.find(x=>x.id===id); if(!s) return;
+            entries.push({id,count:Number(count)||0,scenario:s,category:s.category||getLegacyCategory(s),practice:!!getPracticeScenario(id)});
+        });
+        entries.sort((a,b)=>b.count-a.count || a.scenario.title.localeCompare(b.scenario.title,'pt-BR'));
+        if(!entries.length){
+            container.innerHTML=`<div class="text-center py-12"><div class="text-6xl mb-3">🌟</div><h3 class="text-lg font-bold text-white mb-1">Caderno de Erros Limpo!</h3><p class="text-xs text-slate-400">Você não tem nenhuma questão pendente para revisão no momento. Excelente!</p></div>`;
+            return;
+        }
+        container.innerHTML=`<div class="mb-4 flex flex-wrap items-center justify-between gap-2"><div><div class="text-[10px] uppercase tracking-wider font-black text-slate-500">Prioridade por frequência</div><p class="text-xs text-slate-400 mt-1">Os conteúdos com mais erros aparecem primeiro.</p></div><span class="px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-sinalVermelho text-[10px] font-black">${entries.length} pendência(s)</span></div><div class="space-y-4"></div>`;
+        const list=container.querySelector('.space-y-4');
+        entries.forEach((entry,index)=>{
+            const s=entry.scenario;
+            const item=document.createElement('div');
+            item.className='glass-card rounded-2xl p-5 border border-rose-500/30 bg-rose-500/5';
+            item.innerHTML=`<div class="flex items-start justify-between gap-3 mb-2"><div><div class="flex flex-wrap gap-2"><span class="px-2 py-0.5 rounded bg-rose-500/20 text-sinalVermelho text-[10px] font-bold uppercase">${practiceEscape(entry.category)}</span><span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-400 text-[10px] font-black">${entry.practice?'Prática':'Questão original'}</span>${index===0?'<span class="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-sinalAmarelo text-[10px] font-black">PRIORIDADE</span>':''}</div><h4 class="font-extrabold text-white text-base mt-1">${practiceEscape(s.title)}</h4></div><span class="text-xs font-bold text-sinalVermelho">${entry.count}x Erro(s)</span></div>
+            <p class="text-xs text-slate-300 mb-3 leading-relaxed">${practiceEscape(s.description)}</p>
+            <div class="bg-asfalto p-3 rounded-xl text-xs text-slate-200 border border-slate-800"><strong>💡 Explicação (${practiceEscape(s.article||'CTB')}):</strong> ${practiceEscape(s.explanation||'Revise a situação e tente novamente.')}</div>
+            <div class="flex flex-wrap gap-2 mt-4"><button data-review class="px-3.5 py-2 rounded-xl bg-sinalAmarelo text-asfalto font-black text-xs">↻ Refazer agora</button><button data-similar class="px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-600 text-slate-200 font-black text-xs">🔁 Situação parecida</button></div>`;
+            item.querySelector('[data-review]').onclick=()=>this.reviewScenario(entry.id);
+            item.querySelector('[data-similar]').onclick=()=>this.reviewSimilar(entry.id);
+            list.appendChild(item);
+        });
+    };
+
+    // New achievements related to practical interactions.
+    const _oldTrophies = TROPHIES.slice();
+    TROPHIES.push(
+        {id:'tr_interactive_signs', title:'Leitora de Placas', icon:'🛑', desc:'Reconhecer corretamente 3 situações práticas de placas dentro de cenas de trânsito.'},
+        {id:'tr_interactive_cross', title:'Mestra dos Cruzamentos', icon:'🚦', desc:'Concluir 3 situações interativas de cruzamento e conversão.'},
+        {id:'tr_interactive_overtake', title:'Ultrapassagem na Medida', icon:'🛣️', desc:'Executar corretamente 2 sequências de ultrapassagem.'},
+        {id:'tr_interactive_hazards', title:'Olho Vivo', icon:'👁️', desc:'Vencer 3 rodadas do Caça-Perigos.'},
+        {id:'tr_interactive_master', title:'Motorista Completa', icon:'🏁', desc:'Concluir ao menos uma prática em cada nível de dificuldade.'}
+    );
+
+    // Enhanced Hazard mode: keeps timer, score, restart and rewards, but uses a richer scene and hidden hotspots.
+    AutoEscolaApp.prototype.initHazardGame = function(){
+        const area=document.getElementById('hazardPlayArea'); if(!area) return;
+        clearInterval(this.hazardInterval);
+        this.state.hazardScore=0; this.hazardFinished=false;
+        const hazards=[
+            {id:'h1',icon:'🚶',title:'Pedestre escondido entre veículos',top:'48%',left:'67%',hint:'Movimento atrás da van'},
+            {id:'h2',icon:'🏍️',title:'Motocicleta no ponto cego',top:'59%',left:'52%',hint:'Moto próxima da lateral'},
+            {id:'h3',icon:'🚪',title:'Porta de veículo abrindo',top:'67%',left:'21%',hint:'Porta avançando para a via'},
+            {id:'h4',icon:'🚴',title:'Ciclista ocupando a lateral',top:'40%',left:'36%',hint:'Usuário vulnerável'},
+            {id:'h5',icon:'🚗',title:'Veículo entrando na via',top:'31%',left:'79%',hint:'Saída de garagem/interseção'},
+            {id:'h6',icon:'🛢️',title:'Mancha de óleo / baixa aderência',top:'82%',left:'47%',hint:'Superfície escorregadia'},
+            {id:'h7',icon:'🪨',title:'Obstáculo na pista',top:'74%',left:'62%',hint:'Objeto inesperado'},
+            {id:'h8',icon:'🚧',title:'Sinalização de obra parcialmente encoberta',top:'25%',left:'28%',hint:'Atenção à sinalização'}
+        ];
+        const countEl=document.getElementById('hazardFoundCount');
+        if(countEl) countEl.innerText=`0 / ${hazards.length}`;
+        area.innerHTML=`<svg viewBox="0 0 900 500" class="w-full h-full object-cover" preserveAspectRatio="xMidYMid slice">
+            <defs>
+                <linearGradient id="hazardSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#263642"/><stop offset="1" stop-color="#0e151a"/></linearGradient>
+                <linearGradient id="hazardRoad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#262f37"/><stop offset="1" stop-color="#11161a"/></linearGradient>
+            </defs>
+            <rect width="900" height="500" fill="url(#hazardSky)"/>
+            <rect y="205" width="900" height="295" fill="#2f3a43"/>
+            <polygon points="160,500 744,500 572,205 332,205" fill="url(#hazardRoad)"/>
+            <path d="M452 500 L452 205" stroke="#ffd166" stroke-width="6" stroke-dasharray="22 17" opacity=".75"/>
+            <path d="M340 500 L372 205" stroke="#94a3b8" stroke-width="4" opacity=".5"/><path d="M564 500 L532 205" stroke="#94a3b8" stroke-width="4" opacity=".5"/>
+            <rect x="52" y="235" width="156" height="95" rx="10" fill="#4b5563"/>
+            <rect x="692" y="235" width="144" height="95" rx="10" fill="#52525b"/>
+            <rect x="694" y="224" width="130" height="14" rx="7" fill="#334155"/>
+            <text x="450" y="245" text-anchor="middle" fill="#cbd5e1" font-size="12" font-weight="900">AVENIDA URBANA • LEITURA TÁTICA DA VIA</text>
+            <g transform="translate(420 310)"><rect width="86" height="54" rx="8" fill="#118ab2"/><rect x="10" y="8" width="66" height="13" rx="3" fill="rgba(15,23,42,.25)"/><text x="43" y="38" text-anchor="middle" fill="#fff" font-size="11" font-weight="900">VOCÊ</text></g>
+            <g transform="translate(578 315)"><rect width="82" height="50" rx="8" fill="#6b7280"/><text x="41" y="31" text-anchor="middle" fill="#fff" font-size="10" font-weight="900">VAN</text></g>
+            <g transform="translate(242 330)"><rect width="66" height="48" rx="7" fill="#f7b801"/><text x="33" y="30" text-anchor="middle" fill="#111827" font-size="10" font-weight="900">CARRO</text></g>
+            <path d="M240 390 q70 -22 122 0" fill="none" stroke="#334155" stroke-width="15" opacity=".8"/>
+            <g opacity=".32"><line x1="0" y1="140" x2="900" y2="140" stroke="#fff" stroke-width="2" stroke-dasharray="5 12"/></g>
+        </svg>`;
+        hazards.forEach(h=>{
+            const elem=document.createElement('button');
+            elem.className='absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2 text-2xl sm:text-3xl p-2 rounded-full border border-rose-400/20 bg-rose-500/5 hover:bg-rose-500/20 transition-all practice-pulse';
+            elem.style.top=h.top; elem.style.left=h.left; elem.title=h.title; elem.setAttribute('aria-label',h.title);
+            elem.innerHTML=`<span style="opacity:.16">•</span><span class="hidden">${h.icon}</span>`;
+            elem.onclick=(e)=>{e.stopPropagation(); this.foundHazard(elem,h);};
+            area.appendChild(elem);
+        });
+        let timeLeft=25;
+        document.getElementById('hazardTimer').innerText=`${timeLeft}s`;
+        this.hazardInterval=setInterval(()=>{
+            timeLeft--; document.getElementById('hazardTimer').innerText=`${timeLeft}s`;
+            if(timeLeft<=0){ clearInterval(this.hazardInterval); this.hazardFinished=true; if(this.state.hazardScore<hazards.length){ soundFX.playError(); this.showModal('⏰ Tempo Esgotado!',`Você encontrou ${this.state.hazardScore} de ${hazards.length} riscos. Observe a área e tente novamente.`,'⚠️'); } }
+        },1000);
+    };
+
+    AutoEscolaApp.prototype.foundHazard = function(elem,hazard){
+        if(this.hazardFinished || elem?.dataset?.found==='1') return;
+        if(elem?.dataset) elem.dataset.found='1';
+        soundFX.playCoin();
+        elem.classList.remove('practice-pulse');
+        elem.innerHTML=`<span>${hazard.icon}</span>`;
+        elem.style.background='rgba(6,214,160,.14)'; elem.style.borderColor='#06d6a0';
+        setTimeout(()=>elem.remove(),260);
+        this.state.hazardScore += 1;
+        document.getElementById('hazardFoundCount').innerText=`${this.state.hazardScore} / 8`;
+        if(this.state.hazardScore>=8){
+            this.hazardFinished=true; clearInterval(this.hazardInterval); this.state.hazardCompleted=(Number(this.state.hazardCompleted)||0)+1;
+            soundFX.playLevelUp(); this.state.xp=Math.max(0,Math.floor(Number(this.state.xp)||0)+100); this.state.coins=Math.max(0,Math.floor(Number(this.state.coins)||0)+50); this.checkPracticeTrophies(); this.saveState(); this.triggerConfetti(); this.showModal('🎯 Visão Tática Perfeita!', 'Você identificou todos os 8 perigos da cena! (+100 XP / +50 Moedas)', '🛡️');
+        }
+    };
+
+    // Render performance immediately after initialization.
+    const _originalInit = AutoEscolaApp.prototype.init;
+    AutoEscolaApp.prototype.init = function(){
+        _originalInit.call(this);
+        this.renderPerformancePanel();
+        this.renderMenuPerformancePanel?.();
+    };
+
+    // Small compatibility shim used by init override.
+    AutoEscolaApp.prototype.renderMenuPerformancePanel = function(){ this.renderPerformancePanel(); };
+    </script>
+
 </body>
 </html>

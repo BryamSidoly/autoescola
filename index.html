@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoEscola Master CTB: Desafio no Trânsito</title>
+    <title>AutoEscola do Braia</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -70,6 +70,63 @@
             transform: translateY(-4px);
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
             border-color: rgba(255, 209, 102, 0.3);
+        }
+
+        /* Mobile-first touch/layout refinements */
+        @media (max-width: 640px) {
+            body {
+                font-size: 14px;
+            }
+
+            header {
+                padding-top: 0.65rem !important;
+                padding-bottom: 0.65rem !important;
+            }
+
+            main {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+                padding-top: 1rem !important;
+                padding-bottom: 1.25rem !important;
+            }
+
+            .glass-card,
+            .glass-panel {
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            .glass-card:hover {
+                transform: none;
+                box-shadow: none;
+            }
+
+            button,
+            [role="button"] {
+                min-height: 44px;
+            }
+
+            #svgContainer {
+                min-height: 240px;
+            }
+
+            #hazardPlayArea {
+                height: min(72vw, 360px) !important;
+                min-height: 280px !important;
+            }
+
+            #quizTitle {
+                font-size: 1.15rem;
+            }
+
+            #quizDescription {
+                font-size: 0.82rem;
+            }
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .glass-card:hover {
+                transform: none;
+            }
         }
 
         /* Smooth Screen Transitions */
@@ -143,9 +200,9 @@
                 </div>
                 <div>
                     <h1 class="font-extrabold text-base sm:text-lg text-white leading-tight flex items-center gap-2">
-                        AutoEscola <span class="text-sinalAmarelo">Master CTB</span>
+                        AutoEscola <span class="text-sinalAmarelo">do Braia</span>
                     </h1>
-                    <p class="text-xs text-slate-400 font-medium">Aprenda Trânsito na Vida Real</p>
+                    <p class="text-xs text-slate-400 font-medium">Aprenda Trânsito chapa</p>
                 </div>
             </div>
 
@@ -155,7 +212,7 @@
                 <div class="flex items-center gap-2 bg-asfalto/80 px-3 py-1.5 rounded-full border border-slate-700/60 cursor-pointer hover:border-sinalAmarelo/50 transition-all" onclick="app.showScreen('screen-garage')">
                     <span id="headerAvatarCar" class="text-xl">🚗</span>
                     <div class="hidden sm:block text-left">
-                        <div id="headerUserName" class="text-xs font-bold text-slate-200">Motorista</div>
+                        <div id="headerUserName" class="text-xs font-bold text-slate-200">Motora</div>
                         <div id="headerLevelBadge" class="text-[10px] text-sinalAmarelo font-bold">Nível 1 • Aprendiz</div>
                     </div>
                 </div>
@@ -194,18 +251,18 @@
             <div class="relative overflow-hidden rounded-2xl glass-panel border border-sinalAmarelo/20 p-6 sm:p-8 mb-8 bg-gradient-to-r from-asfaltoLight via-slate-800 to-asfalto">
                 <div class="relative z-10 max-w-2xl">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sinalAmarelo/10 border border-sinalAmarelo/30 text-sinalAmarelo text-xs font-bold mb-4">
-                        <i class="fa-solid font-bold fa-shield-halved"></i> Aprenda Sem Medo • CTB & Direção Defensiva
+                        <i class="fa-solid font-bold fa-shield-halved"></i> Aprenda com o Braia • CTB & Direção Defensiva
                     </div>
                     <h2 class="text-2xl sm:text-4xl font-black text-white mb-3 leading-tight">
-                        Seja uma Motorista Confiante, Conscientizada e de Elite! 🚘
+                        Seja uma igual o Braia! 🚘
                     </h2>
                     <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
-                        Domine preferências em rotatórias, ultrapassagens, placas, regras de cruzamento e situações da vida real com explicações didáticas carinhosas e sistema de aprendizado inteligente.
+                        Vai entender as preferências em rotatórias, ultrapassagens, placas, regras de cruzamento e situações da vida real chapa.
                     </p>
 
                     <div class="flex flex-wrap items-center gap-3">
                         <button onclick="app.startJornada()" class="bg-gradient-to-r from-sinalAmarelo to-amber-500 hover:from-amber-400 hover:to-amber-600 text-asfalto font-extrabold px-6 py-3.5 rounded-xl shadow-lg shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 text-sm sm:text-base">
-                            <i class="fa-solid fa-play text-lg"></i> Iniciar Jornada CTB
+                            <i class="fa-solid fa-play text-lg"></i> Iniciar
                         </button>
                         <button onclick="app.showScreen('screen-garage')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 font-bold px-5 py-3.5 rounded-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2 text-sm">
                             <i class="fa-solid fa-warehouse text-sinalAmarelo"></i> Minha Garagem
@@ -273,8 +330,27 @@
                 </div>
             </div>
 
+            <!-- Duolingo-style Learning Path -->
+            <div class="glass-panel rounded-2xl p-4 sm:p-6 border border-slate-700/80 mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-sinalVerde text-[10px] sm:text-xs font-black uppercase tracking-wider">
+                            <i class="fa-solid fa-route"></i> Trilha de Aprendizado
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-black text-white mt-2">Módulos do CTB</h2>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1">Avance lição por lição, acumule XP e retome seu progresso de onde parou.</p>
+                    </div>
+                    <div class="shrink-0 text-xs font-bold text-slate-400 bg-slate-900/70 px-3 py-2 rounded-xl border border-slate-700">
+                        <span id="moduleOverallProgress">0%</span> concluído
+                    </div>
+                </div>
+                <div id="learningModules" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <!-- Injected dynamically by JS -->
+                </div>
+            </div>
+
             <!-- Quick Navigation Footer Bar -->
-            <div class="flex flex-wrap justify-center gap-4 pt-4 border-t border-slate-800">
+            <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 pt-4 border-t border-slate-800">
                 <button onclick="app.showScreen('screen-trophies')" class="px-4 py-2.5 rounded-xl glass-panel text-slate-300 hover:text-white border border-slate-700/60 hover:border-sinalAmarelo text-xs font-bold flex items-center gap-2 transition-all">
                     🏆 Troféus & Conquistas (<span id="menuTrophyCount">0/6</span>)
                 </button>
@@ -297,7 +373,7 @@
                 
                 <div class="text-center">
                     <span id="quizModeTitle" class="text-xs uppercase tracking-wider font-extrabold text-sinalAmarelo">JORNADA DE APRENDIZADO</span>
-                    <div id="quizProgressText" class="text-xs text-slate-400 font-semibold">Cenário 1 de 27</div>
+                    <div id="quizProgressText" class="text-xs text-slate-400 font-semibold">Cenário 1 de 32</div>
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -333,7 +409,7 @@
 
                 <!-- Scenario Question & Tactical Choice Buttons -->
                 <div class="lg:col-span-6 flex flex-col justify-between">
-                    <div class="glass-panel rounded-2xl p-6 border border-slate-700/70 h-full flex flex-col justify-between">
+                    <div class="glass-panel rounded-2xl p-4 sm:p-6 border border-slate-700/70 h-full flex flex-col justify-between">
                         <div>
                             <!-- Scenario Title & Question Body -->
                             <h3 id="quizTitle" class="text-xl font-black text-white mb-2 leading-tight">
@@ -371,7 +447,7 @@
 
         <!-- ================= PAGE 3: HAZARD PERCEPTION MINI-GAME ================= -->
         <section id="screen-hazard" class="page-screen">
-            <div class="glass-panel rounded-2xl p-6 border border-slate-700/80 mb-6">
+            <div class="glass-panel rounded-2xl p-4 sm:p-6 border border-slate-700/80 mb-6">
                 <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
                     <div>
                         <button onclick="app.showScreen('screen-menu')" class="text-xs text-slate-400 hover:text-white font-bold flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 mb-2">
@@ -417,7 +493,7 @@
 
         <!-- ================= PAGE 4: GARAGE / CAR STORE ================= -->
         <section id="screen-garage" class="page-screen">
-            <div class="glass-panel rounded-2xl p-6 border border-slate-700/80 mb-6">
+            <div class="glass-panel rounded-2xl p-4 sm:p-6 border border-slate-700/80 mb-6">
                 <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
                     <div>
                         <button onclick="app.showScreen('screen-menu')" class="text-xs text-slate-400 hover:text-white font-bold flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 mb-2">
@@ -450,7 +526,7 @@
 
         <!-- ================= PAGE 5: TROPHIES ROOM ================= -->
         <section id="screen-trophies" class="page-screen">
-            <div class="glass-panel rounded-2xl p-6 border border-slate-700/80 mb-6">
+            <div class="glass-panel rounded-2xl p-4 sm:p-6 border border-slate-700/80 mb-6">
                 <div class="flex items-center justify-between gap-4 mb-6">
                     <div>
                         <button onclick="app.showScreen('screen-menu')" class="text-xs text-slate-400 hover:text-white font-bold flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 mb-2">
@@ -474,7 +550,7 @@
 
         <!-- ================= PAGE 6: ERROR REVISION NOTEBOOK ================= -->
         <section id="screen-errors" class="page-screen">
-            <div class="glass-panel rounded-2xl p-6 border border-slate-700/80 mb-6">
+            <div class="glass-panel rounded-2xl p-4 sm:p-6 border border-slate-700/80 mb-6">
                 <div class="flex items-center justify-between gap-4 mb-6">
                     <div>
                         <button onclick="app.showScreen('screen-menu')" class="text-xs text-slate-400 hover:text-white font-bold flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 mb-2">
@@ -702,7 +778,7 @@
 
     <script>
         /**
-         * CTB Scenario Library (27 Detailed Scenarios with dynamic SVG visual templates)
+         * CTB Scenario Library (27 original scenarios + 5 interactive scenarios with dynamic SVG visual templates)
          */
         const SCENARIOS = [
             {
@@ -1187,6 +1263,63 @@
             { id: 'tr_garage', title: 'Garagem Ostentação', icon: '🚘', desc: 'Desbloquear pelo menos 3 carros na garagem.' },
             { id: 'tr_master', title: 'Mestre da Direção Defensiva', icon: '👑', desc: 'Alcançar o Nível 5 de Mestre do CTB!' }
         ];
+
+
+        /**
+         * Trilha modular de aprendizagem.
+         * Cada módulo reutiliza os conteúdos existentes e organiza a jornada
+         * em blocos progressivos, sem remover os modos originais.
+         */
+        const MODULES = [
+            {
+                id: 'mod_fundamentos',
+                title: 'Fundamentos do Trânsito',
+                icon: '🚦',
+                accent: 'sinalAmarelo',
+                description: 'Preferência, cruzamentos, rotatórias, velocidades e leitura básica do fluxo.',
+                scenarioIds: ['scen_01','scen_02','scen_10','scen_17','scen_18','scen_20']
+            },
+            {
+                id: 'mod_sinalizacao',
+                title: 'Sinalização e Regras',
+                icon: '🛑',
+                accent: 'cnhAzul',
+                description: 'Placas, semáforos, iluminação, pisca-alerta e sinalização de emergência.',
+                scenarioIds: ['scen_09','scen_13','scen_15','scen_24','scen_27','interactive_01']
+            },
+            {
+                id: 'mod_ultrapassagem',
+                title: 'Vias e Ultrapassagem',
+                icon: '🛣️',
+                accent: 'sinalVerde',
+                description: 'Ultrapassagem, faixas, acostamento, acesso a rodovias e circulação.',
+                scenarioIds: ['scen_03','scen_04','scen_22','scen_23','scen_25','interactive_02','interactive_04']
+            },
+            {
+                id: 'mod_seguranca',
+                title: 'Segurança e Direção Defensiva',
+                icon: '🛡️',
+                accent: 'sinalVermelho',
+                description: 'Pedestres, chuva, distância, crianças, álcool, emergência e proteção.',
+                scenarioIds: ['scen_05','scen_06','scen_07','scen_08','scen_14','scen_21','scen_26']
+            },
+            {
+                id: 'mod_cidade',
+                title: 'Condução na Cidade',
+                icon: '🏙️',
+                accent: 'dourado',
+                description: 'Estacionamento, celular, buzina, pane seca e comportamento urbano.',
+                scenarioIds: ['scen_11','scen_12','scen_16','scen_19','scen_26','interactive_03']
+            },
+            {
+                id: 'mod_pratica',
+                title: 'Prática e Manobras',
+                icon: '🎮',
+                accent: 'sinalAmarelo',
+                description: 'Tarefas visuais para reconhecer placas, escolher faixas e executar manobras.',
+                scenarioIds: ['interactive_01','interactive_02','interactive_03','interactive_04','interactive_05','scen_01','scen_15']
+            }
+        ];
     </script>
 
     <script>
@@ -1416,7 +1549,10 @@
                     currentScenarioIndex: 0,
                     currentMode: 'jornada', // 'jornada', 'simulado', 'errors'
                     simuladoQuestions: [],
-                    hazardScore: 0
+                    hazardScore: 0,
+                    currentModuleId: null,
+                    completedModules: [],
+                    answeredScenarioId: null
                 };
 
                 this.STORAGE_KEY = 'autoEscola_gameState_v1';
@@ -1429,6 +1565,7 @@
                 this.renderGarage();
                 this.renderTrophies();
                 this.renderErrorNotebook();
+                this.renderLearningModules();
                 this.initConfetti();
             }
 
@@ -1438,6 +1575,11 @@
                     try {
                         const parsed = JSON.parse(saved);
                         this.state = { ...this.state, ...parsed };
+                        this.state.xp = Math.max(0, Math.floor(Number(this.state.xp) || 0));
+                        this.state.coins = Math.max(0, Math.floor(Number(this.state.coins) || 0));
+                        this.state.streak = Math.max(0, Math.floor(Number(this.state.streak) || 0));
+                        this.state.completedModules = Array.isArray(this.state.completedModules) ? this.state.completedModules : [];
+                        this.state.correctHistory = this.state.correctHistory && typeof this.state.correctHistory === 'object' ? this.state.correctHistory : {};
                     } catch (e) {
                         console.error('Error loading state from LocalStorage', e);
                     }
@@ -1447,6 +1589,7 @@
             saveState() {
                 localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.state));
                 this.updateUIHeader();
+                this.renderLearningModules();
             }
 
             checkNamePrompt() {
@@ -1475,8 +1618,9 @@
                 document.getElementById('headerUserName').innerText = this.state.userName;
                 document.getElementById('headerCoins').innerText = this.state.coins;
 
-                // Level Calc (Every 200 XP = 1 Level up to lvl 5)
-                const currentLvl = Math.min(5, Math.floor(this.state.xp / 200) + 1);
+                // XP is cumulative. Every 200 total XP advances one level (max. level 5).
+                const totalXp = Math.max(0, Math.floor(Number(this.state.xp) || 0));
+                const currentLvl = Math.min(5, Math.floor(totalXp / 200) + 1);
                 this.state.level = currentLvl;
 
                 const levelTitles = [
@@ -1489,8 +1633,9 @@
 
                 document.getElementById('headerLevelBadge').innerText = levelTitles[currentLvl - 1];
 
-                // XP Bar percentage
-                const xpInCurrentLvl = this.state.xp % 200;
+                // XP bar reflects only the current level, while the text stays cumulative-safe at level 5.
+                const levelBaseXp = (currentLvl - 1) * 200;
+                const xpInCurrentLvl = Math.min(200, Math.max(0, totalXp - levelBaseXp));
                 const pct = Math.min(100, Math.floor((xpInCurrentLvl / 200) * 100));
                 document.getElementById('headerXpBar').style.width = pct + '%';
                 document.getElementById('headerXpText').innerText = `${xpInCurrentLvl}/200 XP`;
@@ -1526,6 +1671,86 @@
                 if (screenId === 'screen-certificate') this.updateCertificateData();
             }
 
+            // ================= LEARNING PATH =================
+            renderLearningModules() {
+                const container = document.getElementById('learningModules');
+                if (!container) return;
+
+                const totalLessons = MODULES.reduce((sum, module) => sum + module.scenarioIds.length, 0);
+                const completedLessons = MODULES.reduce((sum, module) => {
+                    return sum + module.scenarioIds.filter(id => this.state.correctHistory[id]).length;
+                }, 0);
+                const overallPct = totalLessons ? Math.floor((completedLessons / totalLessons) * 100) : 0;
+
+                const overall = document.getElementById('moduleOverallProgress');
+                if (overall) overall.innerText = `${overallPct}%`;
+
+                container.innerHTML = '';
+
+                MODULES.forEach((module, index) => {
+                    const completedCount = module.scenarioIds.filter(id => this.state.correctHistory[id]).length;
+                    const pct = module.scenarioIds.length ? Math.floor((completedCount / module.scenarioIds.length) * 100) : 0;
+                    const isCompleted = this.state.completedModules.includes(module.id);
+                    const previous = MODULES[index - 1];
+                    const unlocked = index === 0 || this.state.completedModules.includes(previous.id);
+                    const statusText = isCompleted ? 'Concluído' : (unlocked ? 'Disponível' : 'Próximo módulo');
+
+                    const card = document.createElement('div');
+                    card.className = `glass-card rounded-2xl p-4 border ${isCompleted ? 'border-sinalVerde/60 bg-emerald-500/5' : unlocked ? 'border-slate-700/70' : 'border-slate-800 opacity-70'}`;
+
+                    card.innerHTML = `
+                        <div class="flex items-start gap-3">
+                            <div class="w-11 h-11 shrink-0 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center text-2xl">${module.icon}</div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div>
+                                        <div class="text-[10px] uppercase tracking-wider font-black ${isCompleted ? 'text-sinalVerde' : 'text-slate-500'}">Módulo ${index + 1}</div>
+                                        <h3 class="font-black text-white text-sm mt-0.5">${module.title}</h3>
+                                    </div>
+                                    <span class="text-[10px] font-black whitespace-nowrap ${isCompleted ? 'text-sinalVerde' : unlocked ? 'text-sinalAmarelo' : 'text-slate-500'}">${statusText}</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 leading-relaxed mt-2">${module.description}</p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="flex justify-between text-[10px] font-bold text-slate-500 mb-1">
+                                <span>${completedCount}/${module.scenarioIds.length} lições</span>
+                                <span>${pct}%</span>
+                            </div>
+                            <div class="h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                                <div class="h-full bg-gradient-to-r from-cnhAzul via-sinalVerde to-sinalAmarelo transition-all duration-500" style="width:${pct}%"></div>
+                            </div>
+                        </div>
+                        <button
+                            onclick="app.startModule('${module.id}')"
+                            ${unlocked ? '' : 'disabled'}
+                            class="mt-4 w-full py-2.5 rounded-xl ${unlocked ? 'bg-asfaltoCard border border-slate-700 hover:border-sinalAmarelo text-slate-100' : 'bg-slate-900 border border-slate-800 text-slate-600 cursor-not-allowed'} text-xs font-black transition-all">
+                            ${isCompleted ? 'Revisar módulo' : unlocked ? 'Continuar módulo' : '🔒 Complete o anterior'}
+                            ${unlocked ? '<i class="fa-solid fa-arrow-right ml-1"></i>' : ''}
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+
+            startModule(moduleId) {
+                const module = MODULES.find(item => item.id === moduleId);
+                if (!module) return;
+
+                const previousIndex = MODULES.findIndex(item => item.id === moduleId) - 1;
+                if (previousIndex >= 0 && !this.state.completedModules.includes(MODULES[previousIndex].id)) {
+                    return;
+                }
+
+                this.state.currentMode = 'module';
+                this.state.currentModuleId = module.id;
+                this.state.currentScenarioIndex = 0;
+                this.state.answeredScenarioId = null;
+                document.getElementById('quizModeTitle').innerText = `MÓDULO ${MODULES.findIndex(item => item.id === moduleId) + 1} • ${module.title}`;
+                this.loadCurrentScenario();
+                this.showScreen('screen-quiz');
+            }
+
             // ================= SCENARIO / QUIZ RUNNER =================
             startJornada() {
                 this.state.currentMode = 'jornada';
@@ -1550,6 +1775,13 @@
                 if (this.state.currentMode === 'simulado') {
                     return this.state.simuladoQuestions[this.state.currentScenarioIndex];
                 }
+
+                if (this.state.currentMode === 'module') {
+                    const module = MODULES.find(item => item.id === this.state.currentModuleId);
+                    const scenarioId = module?.scenarioIds?.[this.state.currentScenarioIndex];
+                    return SCENARIOS.find(scen => scen.id === scenarioId);
+                }
+
                 return SCENARIOS[this.state.currentScenarioIndex];
             }
 
@@ -1560,8 +1792,17 @@
                     return;
                 }
 
+                this.state.answeredScenarioId = null;
+
                 // Update Quiz HUD
-                const total = this.state.currentMode === 'simulado' ? 10 : SCENARIOS.length;
+                const moduleForProgress = this.state.currentMode === 'module'
+                    ? MODULES.find(item => item.id === this.state.currentModuleId)
+                    : null;
+                const total = this.state.currentMode === 'simulado'
+                    ? this.state.simuladoQuestions.length
+                    : this.state.currentMode === 'module'
+                        ? (moduleForProgress?.scenarioIds?.length || 0)
+                        : SCENARIOS.length;
                 document.getElementById('quizProgressText').innerText = `Cenário ${this.state.currentScenarioIndex + 1} de ${total}`;
                 document.getElementById('quizStreakCount').innerText = this.state.streak;
                 document.getElementById('quizTopicBadge').innerText = scen.topic;
@@ -1641,7 +1882,7 @@
                 if (task === 'turn-selection') {
                     container.innerHTML = `
                         <div class="mb-3 text-xs font-bold text-slate-400">Selecione o veículo:</div>
-                        <div class="grid grid-cols-3 gap-2">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                             <button data-turn-car="A" class="p-3 rounded-xl bg-asfaltoCard border border-slate-700 hover:border-sinalAmarelo transition-all text-center">
                                 <div class="text-3xl mb-1">🚗</div><div class="font-black text-sinalVermelho">Carro A</div><div class="text-[10px] text-slate-400">faixa da direita</div>
                             </button>
@@ -1736,7 +1977,7 @@
                             </button>
                         </div>
                         <div class="mb-2 text-xs font-bold text-slate-400">2. Escolha a conversão:</div>
-                        <div id="turnChoices" class="grid grid-cols-3 gap-2">
+                        <div id="turnChoices" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                             <button data-turn-choice="direita" disabled class="p-3 rounded-xl bg-slate-900 border border-slate-700 text-xs font-bold text-slate-500">↪️ Direita</button>
                             <button data-turn-choice="esquerda" disabled class="p-3 rounded-xl bg-slate-900 border border-slate-700 text-xs font-bold text-slate-500">↩️ Esquerda</button>
                             <button data-turn-choice="reta" disabled class="p-3 rounded-xl bg-slate-900 border border-slate-700 text-xs font-bold text-slate-500">⬆️ Seguir reto</button>
@@ -1819,6 +2060,10 @@
             }
 
             handleAnswer(opt, scen, selectedBtn) {
+                // A scenario can award XP only once, even with rapid clicks or repeated pointer events.
+                if (this.state.answeredScenarioId === scen.id) return;
+                this.state.answeredScenarioId = scen.id;
+
                 // Disable all option buttons
                 const container = document.getElementById('quizOptionsContainer');
                 const buttons = container.querySelectorAll('button');
@@ -1834,15 +2079,14 @@
                     selectedBtn.classList.remove('bg-asfaltoCard', 'border-slate-700');
                     selectedBtn.classList.add('bg-emerald-500/20', 'border-sinalVerde', 'text-sinalVerde');
 
-                    // Streak & XP calculations
+                    // Fixed XP per correct lesson: one answer = one reward, without hidden streak multipliers.
                     this.state.streak += 1;
-                    const comboMult = this.state.streak >= 5 ? 2 : (this.state.streak >= 3 ? 1.5 : 1);
-                    const baseXP = 50;
-                    const gainedXP = Math.floor(baseXP * comboMult);
+                    const gainedXP = 50;
                     const gainedCoins = 20;
 
-                    this.state.xp += gainedXP;
-                    this.state.coins += gainedCoins;
+                    this.state.xp = Math.max(0, Math.floor(Number(this.state.xp) || 0) + gainedXP);
+                    this.state.coins = Math.max(0, Math.floor(Number(this.state.coins) || 0) + gainedCoins);
+                    this.state.correctHistory[scen.id] = (this.state.correctHistory[scen.id] || 0) + 1;
 
                     if (this.state.streak >= 5) {
                         this.unlockTrophy('tr_streak');
@@ -1891,9 +2135,30 @@
             finishQuizMode() {
                 soundFX.playLevelUp();
                 this.triggerConfetti();
+
+                let title = '🎉 Jornada Concluída com Sucesso!';
+                let body = `Você concluiu as questões com maestria! Seu progresso e moedas foram salvos no seu perfil.`;
+
+                if (this.state.currentMode === 'module' && this.state.currentModuleId) {
+                    const module = MODULES.find(item => item.id === this.state.currentModuleId);
+                    if (module && !this.state.completedModules.includes(module.id)) {
+                        this.state.completedModules.push(module.id);
+                        this.state.xp = Math.max(0, Math.floor(Number(this.state.xp) || 0) + 100);
+                        this.state.coins = Math.max(0, Math.floor(Number(this.state.coins) || 0) + 50);
+                        title = `🏆 ${module.title} concluído!`;
+                        body = `Você completou este módulo e recebeu +100 XP e +50 Moedas de bônus.`;
+                    } else if (module) {
+                        title = `📚 ${module.title} revisado!`;
+                        body = `Você revisou este módulo novamente. As recompensas de lição continuam protegidas contra duplicidade.`;
+                    }
+                }
+
+                this.saveState();
+                this.renderLearningModules();
+
                 this.showModal(
-                    '🎉 Módulo Concluído com Sucesso!',
-                    `Você concluiu as questões com maestria! Seu progresso e moedas foram salvos no seu perfil.`,
+                    title,
+                    body,
                     '🏆',
                     false,
                     () => this.showScreen('screen-menu')
@@ -1977,8 +2242,8 @@
                 if (this.state.hazardScore >= 4) {
                     clearInterval(this.hazardInterval);
                     soundFX.playLevelUp();
-                    this.state.xp += 100;
-                    this.state.coins += 50;
+                    this.state.xp = Math.max(0, Math.floor(Number(this.state.xp) || 0) + 100);
+                    this.state.coins = Math.max(0, Math.floor(Number(this.state.coins) || 0) + 50);
                     this.saveState();
                     this.triggerConfetti();
                     this.showModal('🎯 Visão Tática Perfeita!', 'Você identificou todos os perigos potenciais na pista! (+100 XP / +50 Moedas)', '🛡️');

@@ -1,1432 +1,1902 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>AutoEscola Hero - Aprenzo de Trânsito Interativo</title>
-  <style>
-    :root {
-      --bg-main: #0f172a;
-      --card-bg: #1e293b;
-      --card-border: #334155;
-      --primary: #3b82f6;
-      --primary-hover: #2563eb;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --radius: 16px;
-      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background-color: var(--bg-main);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 12px;
-      overflow-x: hidden;
-    }
-
-    #app {
-      width: 100%;
-      max-width: 800px;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
-      min-height: 650px;
-    }
-
-    /* HEADER E GAMIFICAÇÃO */
-    header {
-      background: #0f172a;
-      padding: 16px;
-      border-bottom: 1px solid var(--card-border);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .badge-cnh {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .stats-group {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .stat-chip {
-      background: #334155;
-      padding: 6px 12px;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .combo-chip {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      color: #fff;
-      animation: pulse 1.5s infinite;
-    }
-
-    /* BARRA DE PONTOS CNH (REVERSA) */
-    .cnh-meter-container {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .cnh-meter-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .meter-bar {
-      height: 12px;
-      background: #334155;
-      border-radius: 6px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .meter-fill {
-      height: 100%;
-      width: 0%;
-      background: var(--success);
-      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s;
-    }
-
-    .meter-fill.warning { background: var(--warning); }
-    .meter-fill.danger { background: var(--danger); }
-
-    /* GERENCIADOR DE TELAS (TRANSIÇÃO SUAVE) */
-    .screen {
-      display: none;
-      padding: 20px;
-      flex: 1;
-      flex-direction: column;
-      opacity: 0;
-      transform: translateY(10px);
-      transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-
-    .screen.active {
-      display: flex;
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* MENU PRINCIPAL / DASHBOARD */
-    .welcome-title {
-      font-size: 1.5rem;
-      font-weight: 800;
-      margin-bottom: 6px;
-      color: #fff;
-    }
-
-    .welcome-subtitle {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      margin-bottom: 20px;
-    }
-
-    .levels-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-
-    .level-card {
-      background: #1e293b;
-      border: 2px solid var(--card-border);
-      border-radius: 14px;
-      padding: 16px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      position: relative;
-    }
-
-    .level-card:hover {
-      border-color: var(--primary);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2);
-    }
-
-    .level-card.disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      filter: grayscale(0.8);
-    }
-
-    .level-icon {
-      font-size: 2rem;
-    }
-
-    .level-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-    }
-
-    .level-desc {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      line-height: 1.3;
-    }
-
-    .btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .btn:hover {
-      background: var(--primary-hover);
-      transform: scale(1.02);
-    }
-
-    .btn:active {
-      transform: scale(0.98);
-    }
-
-    .btn-secondary {
-      background: #334155;
-      color: var(--text);
-    }
-
-    .btn-secondary:hover {
-      background: #475569;
-    }
-
-    .btn-danger {
-      background: var(--danger);
-    }
-
-    /* MODOS DE JOGO */
-    /* 1. Cruzamentos */
-    .svg-container {
-      width: 100%;
-      max-height: 320px;
-      background: #0f172a;
-      border-radius: 14px;
-      border: 1px solid var(--card-border);
-      overflow: hidden;
-      margin-bottom: 16px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .options-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .btn-option {
-      background: #334155;
-      border: 2px solid transparent;
-      color: #fff;
-      padding: 14px;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      text-align: center;
-    }
-
-    .btn-option:hover {
-      border-color: var(--primary);
-      background: #475569;
-    }
-
-    .btn-option.correct-pop {
-      animation: popSuccess 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-      background: var(--success) !important;
-      border-color: #059669 !important;
-    }
-
-    .btn-option.shake-error {
-      animation: shake 0.4s ease forwards;
-      background: var(--danger) !important;
-      border-color: #dc2626 !important;
-    }
-
-    /* 2. Drag & Drop de Placas */
-    .drag-stage {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .plates-pool {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-      min-height: 90px;
-      background: #0f172a;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px dashed var(--card-border);
-    }
-
-    .plate-card {
-      width: 75px;
-      height: 75px;
-      background: #fff;
-      color: #000;
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 0.75rem;
-      cursor: grab;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      transition: transform 0.2s, box-shadow 0.2s;
-      touch-action: none;
-    }
-
-    .plate-card:active {
-      cursor: grabbing;
-      transform: scale(1.08);
-    }
-
-    .plate-card.selected-tap {
-      outline: 3px solid var(--primary);
-      transform: scale(1.1);
-    }
-
-    .drop-zones-container {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .drop-zone {
-      background: #1e293b;
-      border: 2px dashed var(--card-border);
-      border-radius: 12px;
-      padding: 10px;
-      min-height: 140px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      transition: background-color 0.2s, border-color 0.2s;
-    }
-
-    .drop-zone.hovered {
-      background: #334155;
-      border-color: var(--primary);
-    }
-
-    .drop-zone-title {
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-align: center;
-      color: var(--text-muted);
-    }
-
-    /* 3. Simulador de Frenagem */
-    .canvas-container {
-      width: 100%;
-      height: 220px;
-      background: #020617;
-      border-radius: 14px;
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 16px;
-      border: 1px solid var(--card-border);
-    }
-
-    .brake-btn {
-      width: 100%;
-      padding: 18px;
-      font-size: 1.2rem;
-      background: var(--danger);
-      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
-    }
-
-    .brake-btn:disabled {
-      background: #475569;
-      box-shadow: none;
-      cursor: not-allowed;
-    }
-
-    /* 4. Encontre a Infração */
-    .spot-scene {
-      position: relative;
-      width: 100%;
-      border-radius: 14px;
-      overflow: hidden;
-      border: 1px solid var(--card-border);
-      background: #0f172a;
-    }
-
-    .hotspot {
-      position: absolute;
-      border: 2px dashed rgba(245, 158, 11, 0.6);
-      border-radius: 50%;
-      cursor: pointer;
-      background: rgba(245, 158, 11, 0.15);
-      transition: all 0.3s;
-    }
-
-    .hotspot.found {
-      border: 3px solid var(--success);
-      background: rgba(16, 185, 129, 0.3);
-      animation: popSuccess 0.4s forwards;
-    }
-
-    /* BOTTOM SHEET (POR QUE ERREI?) */
-    .bottom-sheet-overlay {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(4px);
-      z-index: 100;
-      display: none;
-      align-items: flex-end;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .bottom-sheet-overlay.active {
-      display: flex;
-      opacity: 1;
-    }
-
-    .bottom-sheet {
-      background: #1e293b;
-      width: 100%;
-      border-top-left-radius: 20px;
-      border-top-right-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-      transform: translateY(100%);
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      border-top: 2px solid var(--danger);
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .bottom-sheet-overlay.active .bottom-sheet {
-      transform: translateY(0);
-    }
-
-    .sheet-tag {
-      align-self: flex-start;
-      background: rgba(239, 68, 68, 0.2);
-      color: var(--danger);
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 700;
-    }
-
-    .sheet-title {
-      font-size: 1.2rem;
-      font-weight: 700;
-    }
-
-    .sheet-body {
-      font-size: 0.95rem;
-      color: #cbd5e1;
-      line-height: 1.5;
-    }
-
-    /* MODAL DICA DA RODADA */
-    .modal-overlay {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(4px);
-      z-index: 90;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .modal-overlay.active {
-      display: flex;
-    }
-
-    .modal-card {
-      background: #1e293b;
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 24px;
-      max-width: 500px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      box-shadow: var(--shadow);
-    }
-
-    .tip-bullet {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      font-size: 0.9rem;
-      color: #e2e8f0;
-    }
-
-    .tip-bullet span {
-      background: var(--primary);
-      color: white;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8rem;
-      flex-shrink: 0;
-      font-weight: bold;
-    }
-
-    /* KEYFRAMES E ANIMAÇÕES */
-    @keyframes popSuccess {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.06); }
-      100% { transform: scale(1); }
-    }
-
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      20%, 60% { transform: translateX(-8px); }
-      40%, 80% { transform: translateX(8px); }
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.85; transform: scale(1.03); }
-    }
-
-    /* TELA DE RECICLAGEM / CNH SUSPENSA */
-    .reciclagem-box {
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      padding: 20px;
-    }
-
-    .reciclagem-icon {
-      font-size: 3.5rem;
-      animation: shake 0.6s ease;
-    }
-
-    /* RESPONSIVIDADE */
-    @media (max-width: 600px) {
-      .drop-zones-container {
-        grid-template-columns: 1fr;
-      }
-      .options-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoEscola Master CTB: Desafio no Trânsito</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        asfalto: '#121518',
+                        asfaltoLight: '#1e2329',
+                        asfaltoCard: '#272d36',
+                        sinalAmarelo: '#ffd166',
+                        sinalVerde: '#06d6a0',
+                        sinalVermelho: '#ef476f',
+                        cnhAzul: '#118ab2',
+                        dourado: '#f7b801',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-short': 'bounce 0.6s ease-in-out 2',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-8px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #121518;
+            color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* Glassmorphism elements */
+        .glass-panel {
+            background: rgba(30, 35, 41, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: rgba(39, 45, 54, 0.75);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 209, 102, 0.3);
+        }
+
+        /* Smooth Screen Transitions */
+        .page-screen {
+            display: none;
+            opacity: 0;
+            transform: scale(0.98);
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+
+        .page-screen.active {
+            display: block;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Confetti canvas */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #121518;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #272d36;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ffd166;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printableCertificate, #printableCertificate * {
+                visibility: visible;
+            }
+            #printableCertificate {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+    </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col justify-between text-slate-100 selection:bg-sinalAmarelo selection:text-asfalto">
 
-  <div id="app">
-    <!-- HEADER GAMIFICADO -->
-    <header>
-      <div class="header-top">
-        <div class="badge-cnh" id="cnhBadge">
-          🔰 Categoria: PPD
-        </div>
-        <div class="stats-group">
-          <div class="stat-chip combo-chip" id="comboChip">⚡ Combo 1x</div>
-          <div class="stat-chip">⭐ <span id="xpScore">0</span> XP</div>
-          <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="resetProgress()">⚙️ Reiniciar</button>
-        </div>
-      </div>
+    <!-- Confetti Canvas overlay -->
+    <canvas id="confettiCanvas"></canvas>
 
-      <!-- MEDIDOR REVERSO DE PONTOS DA CNH -->
-      <div class="cnh-meter-container">
-        <div class="cnh-meter-label">
-          <span>Pontuação na Carteira (Limite: 20 pts)</span>
-          <span id="cnhPointsText">0 / 20 pts</span>
+    <!-- Top Navigation & Dashboard Header -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-slate-700/50 px-4 py-3 shadow-lg">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <!-- Brand / Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="app.showScreen('screen-menu')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sinalAmarelo to-amber-600 flex items-center justify-center text-asfalto font-black text-xl shadow-md shadow-amber-500/20">
+                    <i class="fa-solid font-bold fa-car"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-base sm:text-lg text-white leading-tight flex items-center gap-2">
+                        AutoEscola <span class="text-sinalAmarelo">Master CTB</span>
+                    </h1>
+                    <p class="text-xs text-slate-400 font-medium">Aprenda Trânsito na Vida Real</p>
+                </div>
+            </div>
+
+            <!-- User Stats Widget -->
+            <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
+                <!-- Driver Avatar & Level -->
+                <div class="flex items-center gap-2 bg-asfalto/80 px-3 py-1.5 rounded-full border border-slate-700/60 cursor-pointer hover:border-sinalAmarelo/50 transition-all" onclick="app.showScreen('screen-garage')">
+                    <span id="headerAvatarCar" class="text-xl">🚗</span>
+                    <div class="hidden sm:block text-left">
+                        <div id="headerUserName" class="text-xs font-bold text-slate-200">Motorista</div>
+                        <div id="headerLevelBadge" class="text-[10px] text-sinalAmarelo font-bold">Nível 1 • Aprendiz</div>
+                    </div>
+                </div>
+
+                <!-- XP Progress Bar -->
+                <div class="flex flex-col w-20 sm:w-28">
+                    <div class="flex justify-between text-[10px] font-bold text-slate-300 mb-0.5">
+                        <span>XP</span>
+                        <span id="headerXpText">0/100</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                        <div id="headerXpBar" class="h-full bg-gradient-to-r from-cnhAzul via-sinalVerde to-sinalAmarelo transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Coins Counter -->
+                <div class="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-full text-sinalAmarelo font-bold text-xs sm:text-sm shadow-sm" title="Moedas do Trânsito">
+                    <i class="fa-solid fa-coins text-amber-400"></i>
+                    <span id="headerCoins">0</span>
+                </div>
+
+                <!-- Audio Mute Button -->
+                <button id="btnSoundToggle" onclick="soundFX.toggleMute()" class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 hover:border-sinalAmarelo text-slate-300 hover:text-white flex items-center justify-center transition-all" title="Alternar Som">
+                    <i id="iconSound" class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
         </div>
-        <div class="meter-bar">
-          <div class="meter-fill" id="cnhMeterFill"></div>
-        </div>
-      </div>
     </header>
 
-    <!-- 1. DASHBOARD / MENU PRINCIPAL -->
-    <div class="screen active" id="screenDashboard">
-      <h1 class="welcome-title">Olá, Futura Motorista! 🚗</h1>
-      <p class="welcome-subtitle">Escolha um módulo e teste seus conhecimentos de trânsito de forma divertida.</p>
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-grow">
 
-      <div class="levels-grid">
-        <div class="level-card" onclick="startLevel(1)">
-          <div class="level-icon">🚦</div>
-          <div class="level-title">1. Cruzamentos</div>
-          <div class="level-desc">Quem tem a preferência? Identifique a vez de cada veículo na travessia.</div>
-        </div>
+        <!-- ================= PAGE 1: MENU / DASHBOARD ================= -->
+        <section id="screen-menu" class="page-screen active">
+            <!-- Welcome Hero Banner -->
+            <div class="relative overflow-hidden rounded-2xl glass-panel border border-sinalAmarelo/20 p-6 sm:p-8 mb-8 bg-gradient-to-r from-asfaltoLight via-slate-800 to-asfalto">
+                <div class="relative z-10 max-w-2xl">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sinalAmarelo/10 border border-sinalAmarelo/30 text-sinalAmarelo text-xs font-bold mb-4">
+                        <i class="fa-solid font-bold fa-shield-halved"></i> Aprenda Sem Medo • CTB & Direção Defensiva
+                    </div>
+                    <h2 class="text-2xl sm:text-4xl font-black text-white mb-3 leading-tight">
+                        Seja uma Motorista Confiante, Conscientizada e de Elite! 🚘
+                    </h2>
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
+                        Domine preferências em rotatórias, ultrapassagens, placas, regras de cruzamento e situações da vida real com explicações didáticas carinhosas e sistema de aprendizado inteligente.
+                    </p>
 
-        <div class="level-card" onclick="startLevel(2)">
-          <div class="level-icon">🪧</div>
-          <div class="level-title">2. Placas de Trânsito</div>
-          <div class="level-desc">Classifique as placas em Regulamentação, Advertência ou Indicação.</div>
-        </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button onclick="app.startJornada()" class="bg-gradient-to-r from-sinalAmarelo to-amber-500 hover:from-amber-400 hover:to-amber-600 text-asfalto font-extrabold px-6 py-3.5 rounded-xl shadow-lg shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 text-sm sm:text-base">
+                            <i class="fa-solid fa-play text-lg"></i> Iniciar Jornada CTB
+                        </button>
+                        <button onclick="app.showScreen('screen-garage')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 font-bold px-5 py-3.5 rounded-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2 text-sm">
+                            <i class="fa-solid fa-warehouse text-sinalAmarelo"></i> Minha Garagem
+                        </button>
+                    </div>
+                </div>
 
-        <div class="level-card" onclick="startLevel(3)">
-          <div class="level-icon">⏹️</div>
-          <div class="level-title">3. Reação e Frenagem</div>
-          <div class="level-desc">Testador de tempo de reação! Reaja rápido para evitar acidentes.</div>
-        </div>
-
-        <div class="level-card" onclick="startLevel(4)">
-          <div class="level-icon">🔍</div>
-          <div class="level-title">4. Caça às Infrações</div>
-          <div class="level-desc">Encontre motoristas e pedestres cometendo erros na cidade.</div>
-        </div>
-      </div>
-
-      <div style="display: flex; gap: 12px; margin-top: auto;">
-        <button class="btn btn-secondary" style="flex: 1;" onclick="startErrorsReview()" id="btnReviewErrors">
-          🔄 Refazer Meus Erros (<span id="errorCount">0</span>)
-        </button>
-      </div>
-    </div>
-
-    <!-- 2. SCREEN JOGO - MÓDULO GENERICO -->
-    <div class="screen" id="screenGame">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="goHome()">← Voltar</button>
-        <span style="font-weight: 700; font-size: 0.9rem;" id="gameStageTitle">Módulo 1</span>
-      </div>
-
-      <div id="gameContent" style="flex: 1; display: flex; flex-direction: column;">
-        <!-- Injetado dinamicamente via JS -->
-      </div>
-    </div>
-
-    <!-- 3. TELA DE RECICLAGEM (CNH SUSPENSA) -->
-    <div class="screen" id="screenReciclagem">
-      <div class="reciclagem-box">
-        <div class="reciclagem-icon">🚨</div>
-        <h2 style="color: var(--danger);">CNH SUSPENSA!</h2>
-        <p>Você atingiu 20 ou mais pontos na carteira devido a infrações cometidas.</p>
-        <p style="font-size: 0.9rem; color: var(--text-muted);">Para recuperar sua licença e zerar seus pontos, você precisa concluir o Mini-Curso de Reciclagem Obrigatório abaixo.</p>
-
-        <div id="reciclagemQuiz" style="width: 100%; text-align: left; margin-top: 10px;">
-          <!-- Conteúdo do teste de reciclagem -->
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL DICA DA RODADA -->
-    <div class="modal-overlay" id="modalTip">
-      <div class="modal-card">
-        <h2 id="tipTitle">💡 Dica da Rodada</h2>
-        <div id="tipBullets" style="display: flex; flex-direction: column; gap: 10px;"></div>
-        <button class="btn" onclick="closeTipAndStart()">Começar Módulo 🚀</button>
-      </div>
-    </div>
-
-    <!-- BOTTOM SHEET (POR QUE ERREI?) -->
-    <div class="bottom-sheet-overlay" id="bottomSheet">
-      <div class="bottom-sheet">
-        <div class="sheet-tag" id="sheetSeverity">Infração Grave (+5 Pts)</div>
-        <div class="sheet-title" id="sheetTitle">Por que esta resposta está incorreta?</div>
-        <div class="sheet-body" id="sheetExplanation">
-          Explicação didática segundo o Código de Trânsito Brasileiro.
-        </div>
-        <button class="btn" style="margin-top: 8px;" onclick="closeBottomSheet()">Entendi e Quero Continuar ➡️</button>
-      </div>
-    </div>
-
-  </div>
-
-  <script>
-    /* ==========================================================================
-       ESTADO DA APLICAÇÃO & PERSISTÊNCIA LOCALSTORAGE
-       ========================================================================== */
-    const STORAGE_KEY = "autoescola_hero_state_v1";
-
-    const defaultState = {
-      xp: 0,
-      cnhPoints: 0,
-      cnhMax: 20,
-      badgeTitle: "PPD (Permissão Para Dirigir)",
-      combo: 1,
-      streak: 0,
-      errors: [], // Guardará questões com falha
-      currentLevel: 1
-    };
-
-    let state = loadState();
-
-    function loadState() {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        return saved ? JSON.parse(saved) : { ...defaultState };
-      } catch (e) {
-        return { ...defaultState };
-      }
-    }
-
-    function saveState() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      } catch (e) {
-        console.error("Erro ao salvar localStorage", e);
-      }
-      updateHeaderUI();
-    }
-
-    function resetProgress() {
-      if (confirm("Deseja realmente zerar todo o seu progresso e pontos da CNH?")) {
-        state = { ...defaultState };
-        saveState();
-        showScreen("screenDashboard");
-      }
-    }
-
-    /* ==========================================================================
-       SISTEMA DE ÁUDIO WEB (EFEITOS SONOROS SEM ARQUIVOS EXTERNOS)
-       ========================================================================== */
-    const Sound = {
-      ctx: null,
-      init() {
-        if (!this.ctx) {
-          const AudioContext = window.AudioContext || window.webkitAudioContext;
-          if (AudioContext) this.ctx = new AudioContext();
-        }
-        if (this.ctx && this.ctx.state === 'suspended') {
-          this.ctx.resume();
-        }
-      },
-      playSuccess() {
-        this.init();
-        if (!this.ctx) return;
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(523.25, now);
-        osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.15);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-        osc.connect(gain); gain.connect(this.ctx.destination);
-        osc.start(now); osc.stop(now + 0.3);
-      },
-      playError() {
-        this.init();
-        if (!this.ctx) return;
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(180, now);
-        osc.frequency.linearRampToValueAtTime(100, now + 0.25);
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-        osc.connect(gain); gain.connect(this.ctx.destination);
-        osc.start(now); osc.stop(now + 0.3);
-      },
-      playBrake() {
-        this.init();
-        if (!this.ctx) return;
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(600, now);
-        osc.frequency.exponentialRampToValueAtTime(150, now + 0.2);
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-        osc.connect(gain); gain.connect(this.ctx.destination);
-        osc.start(now); osc.stop(now + 0.25);
-      }
-    };
-
-    /* ==========================================================================
-       ATUALIZAÇÃO DE INTERFACE / HEADER
-       ========================================================================== */
-    function updateHeaderUI() {
-      // Atualizar Badges
-      if (state.xp >= 1500) state.badgeTitle = "Especialista em Rodovias 🛣️";
-      else if (state.xp >= 800) state.badgeTitle = "Motorista Ouro 🥇";
-      else if (state.xp >= 300) state.badgeTitle = "Motorista Prata 🥈";
-      else state.badgeTitle = "PPD (Permissão) 🔰";
-
-      document.getElementById('cnhBadge').innerText = state.badgeTitle;
-      document.getElementById('xpScore').innerText = state.xp;
-      document.getElementById('comboChip').innerText = `⚡ Combo ${state.combo}x`;
-      document.getElementById('errorCount').innerText = state.errors.length;
-
-      // Barra de Pontos Reversa
-      const meterFill = document.getElementById('cnhMeterFill');
-      const pointsText = document.getElementById('cnhPointsText');
-      const pct = Math.min((state.cnhPoints / state.cnhMax) * 100, 100);
-      
-      meterFill.style.width = `${pct}%`;
-      pointsText.innerText = `${state.cnhPoints} / ${state.cnhMax} pts`;
-
-      meterFill.className = 'meter-fill';
-      if (state.cnhPoints >= 15) meterFill.classList.add('danger');
-      else if (state.cnhPoints >= 8) meterFill.classList.add('warning');
-
-      // Checar Reciclagem
-      if (state.cnhPoints >= state.cnhMax) {
-        triggerReciclagem();
-      }
-    }
-
-    function showScreen(screenId) {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      const target = document.getElementById(screenId);
-      if (target) target.classList.add('active');
-      updateHeaderUI();
-    }
-
-    function goHome() {
-      showScreen('screenDashboard');
-    }
-
-    /* ==========================================================================
-       SISTEMA PEDAGÓGICO: ERROS & BOTTOM SHEET
-       ========================================================================== */
-    let currentErrorCallback = null;
-
-    function registerAnswer(isCorrect, xpGain, pointsPenalty, severityText, explanationText, questionObj = null) {
-      if (isCorrect) {
-        Sound.playSuccess();
-        state.streak += 1;
-        if (state.streak >= 3) state.combo = 3;
-        else if (state.streak >= 2) state.combo = 2;
-        
-        state.xp += xpGain * state.combo;
-        saveState();
-        return true;
-      } else {
-        Sound.playError();
-        state.streak = 0;
-        state.combo = 1;
-        state.cnhPoints += pointsPenalty;
-
-        if (questionObj) {
-          const exists = state.errors.some(e => e.id === questionObj.id);
-          if (!exists) state.errors.push(questionObj);
-        }
-
-        saveState();
-        openBottomSheet(severityText, pointsPenalty, explanationText);
-        return false;
-      }
-    }
-
-    function openBottomSheet(severityText, penalty, explanation) {
-      document.getElementById('sheetSeverity').innerText = `${severityText} (+${penalty} Pontos CNH)`;
-      document.getElementById('sheetTitle').innerText = "Atenção à Regra de Trânsito!";
-      document.getElementById('sheetExplanation').innerText = explanation;
-      
-      const bs = document.getElementById('bottomSheet');
-      bs.classList.add('active');
-    }
-
-    function closeBottomSheet() {
-      document.getElementById('bottomSheet').classList.remove('active');
-      if (currentErrorCallback) {
-        currentErrorCallback();
-        currentErrorCallback = null;
-      }
-    }
-
-    /* ==========================================================================
-       DICAS DA RODADA (MODAL PRÉ-FASE)
-       ========================================================================== */
-    const stageTips = {
-      1: {
-        title: "💡 Dica: Cruzamentos e Preferência",
-        bullets: [
-          "1. Sem sinalização: A preferência é SEMPRE de quem vem pela DIREITA.",
-          "2. Rotatórias: A preferência é de quem JÁ ESTÁ circulando nela.",
-          "3. Pedestres: Têm prioridade total na faixa não semaforizada."
-        ]
-      },
-      2: {
-        title: "💡 Dica: Categorias de Placas",
-        bullets: [
-          "1. Regulamentação (Borda Vermelha): Impõe proibições, obrigações ou restrições.",
-          "2. Advertência (Amarelas): Alerta sobre perigos potenciais na via.",
-          "3. Indicação (Azuis/Verdes): Orienta caminhos, serviços e locais."
-        ]
-      },
-      3: {
-        title: "💡 Dica: Reação e Frenagem",
-        bullets: [
-          "1. Tempo de Reação: O tempo entre ver o perigo e pisar no freio (médium de 0.75s).",
-          "2. Distância de Parada = Distância de Reação + Distância de Frenagem.",
-          "3. Quanto maior a velocidade, maior o espaço necessário para parar com segurança."
-        ]
-      },
-      4: {
-        title: "💡 Dica: Infração e Segurança",
-        bullets: [
-          "1. Celular ao volante e falta de capacete são Infrações Gravíssimas (7 pontos).",
-          "2. Estacionar sobre a faixa de pedestres é Infração Grave (5 pontos).",
-          "3. Fique de olho na imagem para identificar os comportamentos perigosos!"
-        ]
-      }
-    };
-
-    let selectedLevelToStart = 1;
-
-    function startLevel(levelNum) {
-      selectedLevelToStart = levelNum;
-      const tip = stageTips[levelNum];
-      document.getElementById('tipTitle').innerText = tip.title;
-      const container = document.getElementById('tipBullets');
-      container.innerHTML = tip.bullets.map(b => `<div class="tip-bullet"><span>✓</span> <div>${b}</div></div>`).join('');
-      document.getElementById('modalTip').classList.add('active');
-    }
-
-    function closeTipAndStart() {
-      document.getElementById('modalTip').classList.remove('active');
-      showScreen('screenGame');
-      loadGameMode(selectedLevelToStart);
-    }
-
-    /* ==========================================================================
-       CARREGADOR DOS MODOS DE JOGO
-       ========================================================================== */
-    function loadGameMode(levelNum) {
-      state.currentLevel = levelNum;
-      const container = document.getElementById('gameContent');
-      container.innerHTML = "";
-
-      if (levelNum === 1) renderCruzamentosMode(container);
-      else if (levelNum === 2) renderPlacasMode(container);
-      else if (levelNum === 3) renderFrenagemMode(container);
-      else if (levelNum === 4) renderCacaInfracoesMode(container);
-    }
-
-    /* --------------------------------------------------------------------------
-       MODO 1: CRUZAMENTOS INTERATIVOS
-       -------------------------------------------------------------------------- */
-    const cruzamentoQuestions = [
-      {
-        id: "cruz_1",
-        title: "Cruzamento Sem Sinalização",
-        question: "Dois carros chegam juntos a um cruzamento sem placas ou semáforo. Quem deve avançar primeiro?",
-        options: [
-          { text: "🚗 Carro B (Vermelho - Vem da Direita)", correct: true },
-          { text: "🚙 Carro A (Azul)", correct: false }
-        ],
-        severity: "Infração Gravíssima",
-        penalty: 7,
-        explanation: "Art. 29, III, 'a' do CTB: Quando veículos se cruzarem em local não sinalizado, a preferência de passagem é do veículo que se aproxima pela DIREITA.",
-        svg: `<svg viewBox="0 0 300 200" width="100%" height="100%">
-          <rect width="300" height="200" fill="#0f172a"/>
-          <!-- Vias -->
-          <rect x="120" y="0" width="60" height="200" fill="#334155"/>
-          <rect x="0" y="70" width="300" height="60" fill="#334155"/>
-          <!-- Linhas tracejadas -->
-          <line x1="150" y1="0" x2="150" y2="200" stroke="#f59e0b" stroke-dasharray="8,8" stroke-width="2"/>
-          <line x1="0" y1="100" x2="300" y2="100" stroke="#f59e0b" stroke-dasharray="8,8" stroke-width="2"/>
-          <!-- Carro A (Azul - vindo de baixo) -->
-          <rect x="130" y="140" width="18" height="30" rx="4" fill="#3b82f6"/>
-          <text x="139" y="160" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">A</text>
-          <!-- Carro B (Vermelho - vindo da direita do Carro A) -->
-          <rect x="200" y="78" width="30" height="18" rx="4" fill="#ef4444"/>
-          <text x="215" y="91" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">B</text>
-        </svg>`
-      },
-      {
-        id: "cruz_2",
-        title: "Preferência na Rotatória",
-        question: "O Carro A já está circulando na rotatória. O Carro B está chegando. De quem é a preferência?",
-        options: [
-          { text: "🚗 Carro A (Verde - Já na Rotatória)", correct: true },
-          { text: "🚙 Carro B (Amarelo - Entrando)", correct: false }
-        ],
-        severity: "Infração Grave",
-        penalty: 5,
-        explanation: "Art. 29, III, 'b' do CTB: No caso de rotatória, a preferência é daquele veículo que já estiver circulando por ela.",
-        svg: `<svg viewBox="0 0 300 200" width="100%" height="100%">
-          <rect width="300" height="200" fill="#0f172a"/>
-          <rect x="120" y="0" width="60" height="200" fill="#334155"/>
-          <rect x="0" y="70" width="300" height="60" fill="#334155"/>
-          <circle cx="150" cy="100" r="40" fill="#0f172a" stroke="#334155" stroke-width="20"/>
-          <!-- Carro A na rotatória -->
-          <rect x="115" y="80" width="22" height="14" rx="3" fill="#10b981" transform="rotate(-30 125 87)"/>
-          <text x="126" y="91" fill="#fff" font-size="9" font-weight="bold" text-anchor="middle">A</text>
-          <!-- Carro B se aproximando -->
-          <rect x="220" y="78" width="26" height="16" rx="3" fill="#f59e0b"/>
-          <text x="233" y="90" fill="#fff" font-size="9" font-weight="bold" text-anchor="middle">B</text>
-        </svg>`
-      }
-    ];
-
-    let currentCruzIdx = 0;
-
-    function renderCruzamentosMode(container) {
-      document.getElementById('gameStageTitle').innerText = "1. Cruzamentos & Preferência";
-      const q = cruzamentoQuestions[currentCruzIdx];
-
-      container.innerHTML = `
-        <h3 style="margin-bottom: 8px;">${q.title}</h3>
-        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">${q.question}</p>
-        <div class="svg-container">${q.svg}</div>
-        <div class="options-grid">
-          ${q.options.map((opt, i) => `
-            <button class="btn-option" onclick="checkCruzamentoAnswer(${i}, this)">${opt.text}</button>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    function checkCruzamentoAnswer(optIdx, btnEl) {
-      const q = cruzamentoQuestions[currentCruzIdx];
-      const isCorrect = q.options[optIdx].correct;
-
-      if (isCorrect) {
-        btnEl.classList.add('correct-pop');
-        registerAnswer(true, 100, 0, "", "", q);
-        setTimeout(() => {
-          currentCruzIdx = (currentCruzIdx + 1) % cruzamentoQuestions.length;
-          renderCruzamentosMode(document.getElementById('gameContent'));
-        }, 1200);
-      } else {
-        btnEl.classList.add('shake-error');
-        currentErrorCallback = () => {
-          currentCruzIdx = (currentCruzIdx + 1) % cruzamentoQuestions.length;
-          renderCruzamentosMode(document.getElementById('gameContent'));
-        };
-        registerAnswer(false, 0, q.penalty, q.severity, q.explanation, q);
-      }
-    }
-
-    /* --------------------------------------------------------------------------
-       MODO 2: ARRASTAR E SOLTAR DE PLACAS
-       -------------------------------------------------------------------------- */
-    const placasData = [
-      { id: "p1", code: "R-1", text: "PARE", type: "reg", color: "#ef4444", shape: "oct" },
-      { id: "p2", code: "A-1a", text: "Curva", type: "adv", color: "#f59e0b", shape: "rhomb" },
-      { id: "p3", code: "S-1", text: "Hospital", type: "ind", color: "#3b82f6", shape: "rect" },
-      { id: "p4", code: "R-4a", text: "Proibido ↰", type: "reg", color: "#ef4444", shape: "circle" }
-    ];
-
-    let selectedTapPlate = null;
-
-    function renderPlacasMode(container) {
-      document.getElementById('gameStageTitle').innerText = "2. Associação de Placas";
-
-      container.innerHTML = `
-        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">
-          Arraste ou toque na placa e depois selecione a categoria correta:
-        </p>
-        
-        <div class="drag-stage">
-          <div class="plates-pool" id="platesPool">
-            ${placasData.map(p => `
-              <div class="plate-card" draggable="true" id="${p.id}" 
-                   data-type="${p.type}" onclick="handlePlateTap('${p.id}')"
-                   ondragstart="handleDragStart(event)">
-                <span style="font-size: 0.7rem; color: #64748b;">${p.code}</span>
-                <span style="font-size: 0.85rem; font-weight: 800; color: ${p.color}">${p.text}</span>
-              </div>
-            `).join('')}
-          </div>
-
-          <div class="drop-zones-container">
-            <div class="drop-zone" data-target="reg" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" onclick="handleZoneTap('reg')">
-              <div class="drop-zone-title" style="color: #f87171;">🔴 Regulamentação</div>
-              <div style="font-size:0.75rem; color:#94a3b8; text-align:center;">Obrigação / Proibição</div>
+                <!-- Decorative SUV / Road Graphic -->
+                <div class="hidden md:block absolute -right-6 -bottom-10 opacity-30 lg:opacity-50 pointer-events-none text-9xl text-slate-600 transform -rotate-12">
+                    🏎️
+                </div>
             </div>
 
-            <div class="drop-zone" data-target="adv" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" onclick="handleZoneTap('adv')">
-              <div class="drop-zone-title" style="color: #fbbf24;">🟡 Advertência</div>
-              <div style="font-size:0.75rem; color:#94a3b8; text-align:center;">Alerta de Perigo</div>
+            <!-- Game Modes Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                <!-- Mode 1: Jornada de Aprendizado -->
+                <div onclick="app.startJornada()" class="glass-card rounded-2xl p-5 cursor-pointer border border-slate-700/60 hover:border-sinalAmarelo group">
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sinalAmarelo flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                        🗺️
+                    </div>
+                    <h3 class="font-bold text-lg text-white mb-1 group-hover:text-sinalAmarelo transition-colors">Jornada do CTB</h3>
+                    <p class="text-xs text-slate-400 mb-4 leading-relaxed">Cenários ordenados por temas: preferência, ultrapassagem, sinalização e direção defensiva.</p>
+                    <span class="inline-flex items-center gap-1 text-xs font-bold text-sinalAmarelo">
+                        Jogar Agora <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
+                    </span>
+                </div>
+
+                <!-- Mode 2: Simulado Rápido -->
+                <div onclick="app.startSimulado()" class="glass-card rounded-2xl p-5 cursor-pointer border border-slate-700/60 hover:border-cnhAzul group">
+                    <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/30 text-cnhAzul flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                        ⏱️
+                    </div>
+                    <h3 class="font-bold text-lg text-white mb-1 group-hover:text-cnhAzul transition-colors">Simulado Rápido</h3>
+                    <p class="text-xs text-slate-400 mb-4 leading-relaxed">10 questões aleatórias para testar seus reflexos e conhecimento rápido do código.</p>
+                    <span class="inline-flex items-center gap-1 text-xs font-bold text-cnhAzul">
+                        Fazer Simulado <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
+                    </span>
+                </div>
+
+                <!-- Mode 3: Caçador de Perigos -->
+                <div onclick="app.startHazardGame()" class="glass-card rounded-2xl p-5 cursor-pointer border border-slate-700/60 hover:border-sinalVermelho group">
+                    <div class="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/30 text-sinalVermelho flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                        ⚠️
+                    </div>
+                    <h3 class="font-bold text-lg text-white mb-1 group-hover:text-sinalVermelho transition-colors">Caça-Perigos</h3>
+                    <p class="text-xs text-slate-400 mb-4 leading-relaxed">Mini-jogo de visão tática: encontre e toque nas ameaças na rua antes que o tempo acabe!</p>
+                    <span class="inline-flex items-center gap-1 text-xs font-bold text-sinalVermelho">
+                        Caçar Riscos <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
+                    </span>
+                </div>
+
+                <!-- Mode 4: Caderno de Erros -->
+                <div onclick="app.showScreen('screen-errors')" class="glass-card rounded-2xl p-5 cursor-pointer border border-slate-700/60 hover:border-sinalVerde group">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-sinalVerde flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                        📖
+                    </div>
+                    <h3 class="font-bold text-lg text-white mb-1 group-hover:text-sinalVerde transition-colors">Caderno de Revisão</h3>
+                    <p class="text-xs text-slate-400 mb-4 leading-relaxed">Sistema de repetição espaçada: revise apenas as questões onde errou anteriormente.</p>
+                    <div class="flex items-center justify-between">
+                        <span class="inline-flex items-center gap-1 text-xs font-bold text-sinalVerde">
+                            Revisar Erros
+                        </span>
+                        <span id="badgePendingErrors" class="px-2 py-0.5 rounded-full bg-sinalVermelho text-white text-[10px] font-black">0</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="drop-zone" data-target="ind" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" onclick="handleZoneTap('ind')">
-              <div class="drop-zone-title" style="color: #60a5fa;">🔵 Indicação</div>
-              <div style="font-size:0.75rem; color:#94a3b8; text-align:center;">Orientação / Serviço</div>
+            <!-- Quick Navigation Footer Bar -->
+            <div class="flex flex-wrap justify-center gap-4 pt-4 border-t border-slate-800">
+                <button onclick="app.showScreen('screen-trophies')" class="px-4 py-2.5 rounded-xl glass-panel text-slate-300 hover:text-white border border-slate-700/60 hover:border-sinalAmarelo text-xs font-bold flex items-center gap-2 transition-all">
+                    🏆 Troféus & Conquistas (<span id="menuTrophyCount">0/6</span>)
+                </button>
+                <button onclick="app.showScreen('screen-certificate')" class="px-4 py-2.5 rounded-xl glass-panel text-slate-300 hover:text-white border border-slate-700/60 hover:border-sinalAmarelo text-xs font-bold flex items-center gap-2 transition-all">
+                    📜 Certificado de Conclusão CTB
+                </button>
+                <button onclick="app.resetDataConfirm()" class="px-4 py-2.5 rounded-xl glass-panel text-rose-400 hover:text-rose-300 border border-slate-700/60 hover:border-rose-500/40 text-xs font-bold flex items-center gap-2 transition-all">
+                    🔄 Reiniciar Progresso
+                </button>
             </div>
-          </div>
+        </section>
+
+        <!-- ================= PAGE 2: QUIZ / SCENARIO RUNNER ================= -->
+        <section id="screen-quiz" class="page-screen">
+            <!-- Quiz Header Info Bar -->
+            <div class="flex items-center justify-between gap-3 mb-4 bg-slate-800/80 p-3 rounded-xl border border-slate-700">
+                <button onclick="app.showScreen('screen-menu')" class="text-xs text-slate-400 hover:text-white font-bold flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700">
+                    <i class="fa-solid fa-arrow-left"></i> Menu
+                </button>
+                
+                <div class="text-center">
+                    <span id="quizModeTitle" class="text-xs uppercase tracking-wider font-extrabold text-sinalAmarelo">JORNADA DE APRENDIZADO</span>
+                    <div id="quizProgressText" class="text-xs text-slate-400 font-semibold">Cenário 1 de 27</div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <div class="px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-sinalAmarelo font-black text-xs flex items-center gap-1">
+                        🔥 Streak: <span id="quizStreakCount">0</span>x
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Interactive 2D Dynamic Canvas / SVG Visualizer -->
+                <div class="lg:col-span-6 flex flex-col justify-center items-center">
+                    <div class="w-full glass-panel rounded-2xl p-4 border border-slate-700/70 shadow-2xl relative overflow-hidden flex flex-col items-center">
+                        <div class="w-full flex items-center justify-between mb-2">
+                            <span id="quizTopicBadge" class="px-2.5 py-0.5 rounded-md bg-cnhAzul/20 border border-cnhAzul/40 text-sky-300 text-[11px] font-bold">
+                                Preferência no Trânsito
+                            </span>
+                            <span id="quizCtbArticle" class="text-[11px] font-bold text-slate-400">
+                                Art. 29 CTB
+                            </span>
+                        </div>
+
+                        <!-- Graphic Container -->
+                        <div id="svgContainer" class="w-full h-64 sm:h-80 bg-asfalto rounded-xl border border-slate-800 flex items-center justify-center relative overflow-hidden p-2">
+                            <!-- Dynamic SVG injected via JS -->
+                        </div>
+
+                        <p class="text-[11px] text-slate-400 text-center mt-2 italic">
+                            💡 Observe atentamente as setas, sinalizações e os veículos na ilustração acima.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Scenario Question & Tactical Choice Buttons -->
+                <div class="lg:col-span-6 flex flex-col justify-between">
+                    <div class="glass-panel rounded-2xl p-6 border border-slate-700/70 h-full flex flex-col justify-between">
+                        <div>
+                            <!-- Scenario Title & Question Body -->
+                            <h3 id="quizTitle" class="text-xl font-black text-white mb-2 leading-tight">
+                                Quem tem a preferência neste cruzamento?
+                            </h3>
+                            <p id="quizDescription" class="text-slate-300 text-sm leading-relaxed mb-6">
+                                O veículo Vermelho e o veículo Azul se aproximam ao mesmo tempo de um cruzamento sem placas de "Pare" ou semáforo. O veículo Vermelho vem pela direita do motorista do veículo Azul.
+                            </p>
+
+                            <!-- Options Container -->
+                            <div id="quizOptionsContainer" class="space-y-3">
+                                <!-- Dynamic Option Buttons injected by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Feedback Panel (Shown after answering) -->
+                        <div id="quizFeedbackBox" class="hidden mt-6 p-4 rounded-xl border transition-all animate-fadeIn">
+                            <div class="flex items-start gap-3">
+                                <div id="feedbackIcon" class="text-2xl mt-0.5">✅</div>
+                                <div class="flex-grow">
+                                    <h4 id="feedbackTitle" class="font-extrabold text-sm sm:text-base mb-1">Resposta Correta! +50 XP</h4>
+                                    <p id="feedbackExplanation" class="text-xs sm:text-sm leading-relaxed text-slate-200">
+                                        Segundo o Art. 29 do CTB, em cruzamentos não sinalizados, a preferência é do veículo que se aproxima pela direita.
+                                    </p>
+                                </div>
+                            </div>
+                            <button id="btnNextScenario" onclick="app.nextScenario()" class="mt-4 w-full bg-sinalAmarelo hover:bg-amber-400 text-asfalto font-extrabold py-3 px-4 rounded-xl shadow-lg transition-all text-sm flex items-center justify-center gap-2">
+                                Próximo Cenário <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 3: HAZARD PERCEPTION MINI-GAME ================= -->
+        <section id="screen-hazard" class="page-screen">
+            <div class="glass-panel rounded-2xl p-6 border border-slate-700/80 mb-6">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                    <div>
+                        <button onclick="app.showScreen('screen-menu')" class="text-xs text-slate-400 hover:text-white font-bold flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 mb-2">
+                            <i class="fa-solid fa-arrow-left"></i> Voltar ao Menu
+                        </button>
+                        <h2 class="text-2xl font-black text-white flex items-center gap-2">
+                            ⚠️ Caça-Perigos: Visão Tática de Trânsito
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Encontre e clique em todas as situações de risco na imagem da via antes do tempo esgotar!
+                        </p>
+                    </div>
+
+                    <!-- Game HUD Stats -->
+                    <div class="flex items-center gap-4 bg-slate-900/80 px-4 py-2 rounded-xl border border-slate-700">
+                        <div class="text-center">
+                            <div class="text-[10px] text-slate-400 font-bold uppercase">Tempo</div>
+                            <div id="hazardTimer" class="text-xl font-black text-sinalVermelho animate-pulse">20s</div>
+                        </div>
+                        <div class="w-px h-8 bg-slate-700"></div>
+                        <div class="text-center">
+                            <div class="text-[10px] text-slate-400 font-bold uppercase">Encontrados</div>
+                            <div id="hazardFoundCount" class="text-xl font-black text-sinalVerde">0 / 4</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Canvas/SVG Interactive Area -->
+                <div class="relative w-full max-w-4xl mx-auto h-[380px] sm:h-[450px] bg-slate-900 rounded-2xl border-2 border-slate-700 overflow-hidden shadow-2xl select-none" id="hazardPlayArea">
+                    <!-- Dynamic interactive hazard elements rendered via JS -->
+                </div>
+
+                <div class="mt-4 flex items-center justify-between">
+                    <p class="text-xs text-slate-400">
+                        💡 <span class="font-bold">Dica de Direção Defensiva:</span> Fique atenta a pedestres saindo entre carros, ciclistas sem sinalizar, óleo na pista e portas abrindo!
+                    </p>
+                    <button onclick="app.initHazardGame()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold border border-slate-600 text-slate-200 flex items-center gap-1.5">
+                        <i class="fa-solid fa-rotate-right"></i> Reiniciar Fase
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 4: GARAGE / CAR STORE ================= -->
+        <section id="screen-garage" class="page-screen">
+            <div class="glass-panel rounded-2xl p-6 border border-slate-700/80 mb-6">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div>
+                        <button onclick="app.showScreen('screen-menu')" class="text-xs text-slate-400 hover:text-white font-bold flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 mb-2">
+                            <i class="fa-solid fa-arrow-left"></i> Voltar ao Menu
+                        </button>
+                        <h2 class="text-2xl font-black text-white flex items-center gap-2">
+                            🏎️ Garagem de Veículos & Personagem
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Use suas Moedas do Trânsito ganhas para desbloquear carros exclusivos para o seu avatar!
+                        </p>
+                    </div>
+
+                    <!-- Driver Profile Card -->
+                    <div class="bg-asfaltoCard p-3 rounded-xl border border-slate-700 flex items-center gap-3">
+                        <div id="garageDriverAvatar" class="text-4xl">🚗</div>
+                        <div>
+                            <div class="text-xs text-slate-400 font-bold">Motorista Atual</div>
+                            <div id="garageDriverName" class="text-sm font-black text-sinalAmarelo">Aluna Aprendiz</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cars Grid -->
+                <div id="garageGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Injected dynamically by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 5: TROPHIES ROOM ================= -->
+        <section id="screen-trophies" class="page-screen">
+            <div class="glass-panel rounded-2xl p-6 border border-slate-700/80 mb-6">
+                <div class="flex items-center justify-between gap-4 mb-6">
+                    <div>
+                        <button onclick="app.showScreen('screen-menu')" class="text-xs text-slate-400 hover:text-white font-bold flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 mb-2">
+                            <i class="fa-solid fa-arrow-left"></i> Voltar ao Menu
+                        </button>
+                        <h2 class="text-2xl font-black text-white flex items-center gap-2">
+                            🏆 Galeria de Conquistas & Troféus
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Sua jornada para se tornar uma motorista de elite do CTB marcada por grandes conquistas!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Trophies Grid -->
+                <div id="trophiesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- Injected dynamically by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 6: ERROR REVISION NOTEBOOK ================= -->
+        <section id="screen-errors" class="page-screen">
+            <div class="glass-panel rounded-2xl p-6 border border-slate-700/80 mb-6">
+                <div class="flex items-center justify-between gap-4 mb-6">
+                    <div>
+                        <button onclick="app.showScreen('screen-menu')" class="text-xs text-slate-400 hover:text-white font-bold flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 mb-2">
+                            <i class="fa-solid fa-arrow-left"></i> Voltar ao Menu
+                        </button>
+                        <h2 class="text-2xl font-black text-white flex items-center gap-2">
+                            📖 Caderno de Revisão Inteligente
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Aqui ficam salvos os cenários em que você teve dúvida ou errou. Treine até dominar 100%!
+                        </p>
+                    </div>
+                </div>
+
+                <div id="errorNotebookContent">
+                    <!-- Injected dynamically by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 7: CERTIFICATE ================= -->
+        <section id="screen-certificate" class="page-screen">
+            <div class="glass-panel rounded-2xl p-6 border border-slate-700/80 mb-6 max-w-4xl mx-auto">
+                <div class="flex items-center justify-between gap-4 mb-6 no-print">
+                    <button onclick="app.showScreen('screen-menu')" class="text-xs text-slate-400 hover:text-white font-bold flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700">
+                        <i class="fa-solid fa-arrow-left"></i> Voltar ao Menu
+                    </button>
+                    <button onclick="window.print()" class="px-5 py-2.5 rounded-xl bg-sinalAmarelo hover:bg-amber-400 text-asfalto font-extrabold text-xs flex items-center gap-2 shadow-lg">
+                        <i class="fa-solid fa-print"></i> Imprimir ou Salvar PDF
+                    </button>
+                </div>
+
+                <!-- Printable Certificate Container -->
+                <div id="printableCertificate" class="bg-slate-900 border-4 border-sinalAmarelo rounded-2xl p-8 sm:p-12 text-center relative overflow-hidden shadow-2xl">
+                    <div class="absolute -right-12 -top-12 opacity-10 text-9xl">👑</div>
+                    <div class="absolute -left-12 -bottom-12 opacity-10 text-9xl">🛡️</div>
+
+                    <!-- Seal -->
+                    <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-sinalAmarelo to-amber-600 flex items-center justify-center text-asfalto text-3xl font-black shadow-xl">
+                        🏅
+                    </div>
+
+                    <h2 class="text-xs font-black uppercase tracking-widest text-sinalAmarelo mb-2">CERTIFICADO DE DESTAQUE & EXCELÊNCIA EM TRÂNSITO</h2>
+                    <h3 class="text-3xl sm:text-4xl font-extrabold text-white mb-6 font-serif">AutoEscola Master CTB</h3>
+
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto mb-6">
+                        Certificamos com honras que a motorista exemplar
+                    </p>
+
+                    <div id="certDriverName" class="text-2xl sm:text-4xl font-black text-sinalAmarelo underline decoration-sinalAmarelo/50 decoration-wavy mb-6">
+                        MOTORISTA DEDICADA
+                    </div>
+
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto mb-8">
+                        Demonstrou total domínio do Código de Trânsito Brasileiro (CTB), regras de preferência, sinalização e princípios de direção defensiva na vida real.
+                    </p>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-lg mx-auto pt-6 border-t border-slate-800 text-left">
+                        <div>
+                            <span class="text-[10px] text-slate-500 uppercase font-bold block">Nível Atingido</span>
+                            <span id="certLevelText" class="text-xs font-bold text-sinalVerde">Nível 5 • Mestre</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-500 uppercase font-bold block">Data da Conquista</span>
+                            <span id="certDateText" class="text-xs font-bold text-slate-300">02/10/2026</span>
+                        </div>
+                        <div class="col-span-2 sm:col-span-1">
+                            <span class="text-[10px] text-slate-500 uppercase font-bold block">Código Verificador</span>
+                            <span id="certCodeText" class="text-xs font-mono font-bold text-amber-400">CTB-9982-2026</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Backdrop -->
+    <div id="appModal" class="fixed inset-0 bg-asfalto/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel border border-sinalAmarelo/30 rounded-2xl max-w-md w-full p-6 text-center shadow-2xl relative animate-bounce-short">
+            <div id="modalIcon" class="text-5xl mb-3">🎉</div>
+            <h3 id="modalTitle" class="text-xl font-black text-white mb-2">Título do Modal</h3>
+            <p id="modalBody" class="text-sm text-slate-300 mb-6 leading-relaxed">Mensagem explicativa aqui.</p>
+            
+            <div id="modalInputWrapper" class="hidden mb-6">
+                <input type="text" id="modalInputName" placeholder="Digite o nome da motorista..." class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white font-bold text-center focus:border-sinalAmarelo outline-none">
+            </div>
+
+            <div class="flex justify-center gap-3">
+                <button id="btnModalConfirm" onclick="app.closeModal()" class="bg-sinalAmarelo hover:bg-amber-400 text-asfalto font-extrabold px-6 py-2.5 rounded-xl text-sm shadow-md transition-all">
+                    Entendido!
+                </button>
+            </div>
         </div>
-      `;
-    }
+    </div>
 
-    function handlePlateTap(id) {
-      document.querySelectorAll('.plate-card').forEach(c => c.classList.remove('selected-tap'));
-      selectedTapPlate = placasData.find(p => p.id === id);
-      const el = document.getElementById(id);
-      if (el) el.classList.add('selected-tap');
-    }
+    <script>
+        /**
+         * Web Audio API Synthesizer Sound Engine
+         */
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.isMuted = false;
+            }
 
-    function handleZoneTap(targetType) {
-      if (!selectedTapPlate) return;
-      evaluatePlateDrop(selectedTapPlate.id, selectedTapPlate.type, targetType);
-      selectedTapPlate = null;
-    }
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) {
+                        this.ctx = new AudioCtx();
+                    }
+                }
+            }
 
-    function handleDragStart(e) {
-      e.dataTransfer.setData("text/plain", e.target.id);
-      e.dataTransfer.setData("type", e.target.dataset.type);
-    }
+            toggleMute() {
+                this.isMuted = !this.isMuted;
+                const icon = document.getElementById('iconSound');
+                if (this.isMuted) {
+                    icon.className = 'fa-solid fa-volume-xmark text-rose-400';
+                } else {
+                    icon.className = 'fa-solid fa-volume-high text-slate-300';
+                    this.playCoin();
+                }
+            }
 
-    function handleDragOver(e) {
-      e.preventDefault();
-    }
+            playSuccess() {
+                if (this.isMuted) return;
+                this.init();
+                if (!this.ctx) return;
 
-    function handleDrop(e) {
-      e.preventDefault();
-      const id = e.dataTransfer.getData("text/plain");
-      const type = e.dataTransfer.getData("type");
-      const dropZone = e.currentTarget;
-      const targetType = dropZone.dataset.target;
-      evaluatePlateDrop(id, type, targetType);
-    }
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
 
-    function evaluatePlateDrop(plateId, plateType, targetType) {
-      const plateEl = document.getElementById(plateId);
-      if (!plateEl) return;
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
 
-      if (plateType === targetType) {
-        registerAnswer(true, 80, 0, "", "");
-        plateEl.style.opacity = "0.3";
-        plateEl.onclick = null;
-        plateEl.draggable = false;
-      } else {
-        registerAnswer(false, 0, 4, "Infração Média", "As placas de Regulamentação são vermelhas (obrigações), Advertência são amarelas (alertas) e Indicação orientam caminhos.", {
-          id: `placa_err_${plateId}`,
-          title: "Classificação de Placas"
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.35);
+            }
+
+            playError() {
+                if (this.isMuted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+
+            playCoin() {
+                if (this.isMuted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(987.77, now); // B5
+                osc.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.25);
+            }
+
+            playLevelUp() {
+                if (this.isMuted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const notes = [440, 554.37, 659.25, 880];
+                notes.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    const now = this.ctx.currentTime + (i * 0.08);
+
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now);
+
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                });
+            }
+        }
+
+        const soundFX = new SoundEngine();
+    </script>
+
+    <script>
+        /**
+         * CTB Scenario Library (27 Detailed Scenarios with dynamic SVG visual templates)
+         */
+        const SCENARIOS = [
+            {
+                id: 'scen_01',
+                topic: 'Cruzamento Sem Sinalização',
+                article: 'Art. 29, III, "a" do CTB',
+                title: 'Quem tem a preferência neste cruzamento?',
+                description: 'Dois carros se aproximam ao mesmo tempo de um cruzamento sem placa "PARE" e sem semáforo. O Carro Vermelho vem da direita do Carro Azul.',
+                svgType: 'crossroad',
+                carRight: 'Vermelho',
+                carLeft: 'Azul',
+                options: [
+                    { text: 'A preferência é do Carro Vermelho, pois vem pela direita.', correct: true },
+                    { text: 'A preferência é do Carro Azul, pois está em velocidade constante.', correct: false },
+                    { text: 'Ambos devem buzinar e passar juntos.', correct: false },
+                    { text: 'Quem piscar o farol primeiro tem a preferência.', correct: false }
+                ],
+                explanation: 'O Artigo 29 do CTB estabelece que, em cruzamentos não sinalizados, a preferência de passagem é do veículo que se aproxima pela DIREITA.'
+            },
+            {
+                id: 'scen_02',
+                topic: 'Rotatórias',
+                article: 'Art. 29, III, "b" do CTB',
+                title: 'Preferência em Rotatórias',
+                description: 'O Carro Amarelo já está circulando dentro da rotatória. O Carro Verde se aproxima da via de acesso querendo entrar. De quem é a preferência?',
+                svgType: 'roundabout',
+                options: [
+                    { text: 'Do Carro Amarelo, que já está em circulação na rotatória.', correct: true },
+                    { text: 'Do Carro Verde, pois vem da via principal.', correct: false },
+                    { text: 'De quem estiver dirigindo mais rápido.', correct: false },
+                    { text: 'Daquele que acionar o pisca-alerta primeiro.', correct: false }
+                ],
+                explanation: 'Na ausência de sinalização específica, a preferência de passagem na rotatória é do veículo que já estiver circulando por ela.'
+            },
+            {
+                id: 'scen_03',
+                topic: 'Ultrapassagem & Linhas',
+                article: 'Art. 203, V do CTB',
+                title: 'Linha Amarela Dupla Contínua',
+                description: 'Você está dirigindo em uma pista simples com linha amarela dupla contínua no centro. O caminhão à sua frente está devagar.',
+                svgType: 'doubleLine',
+                options: [
+                    { text: 'É estritamente proibido ultrapassar sobre linha contínua.', correct: true },
+                    { text: 'Pode ultrapassar se der pisca e buzinar.', correct: false },
+                    { text: 'Pode ultrapassar apenas se não houver radar por perto.', correct: false },
+                    { text: 'Ultrapassar pela direita é liberado.', correct: false }
+                ],
+                explanation: 'A linha amarela contínua (simples ou dupla) proíbe a ultrapassagem nos dois sentidos da via. Ultrapassar ali é infração gravíssima (multa x5).'
+            },
+            {
+                id: 'scen_04',
+                topic: 'Proteção a Ciclistas',
+                article: 'Art. 201 do CTB',
+                title: 'Distância Lateral de Ciclistas',
+                description: 'Ao ultrapassar um ciclista pedalando no bordo da pista, qual a distância lateral mínima que o motorista deve manter?',
+                svgType: 'cyclist',
+                options: [
+                    { text: 'Distância mínima obrigatória de 1,5 metro.', correct: true },
+                    { text: 'Apenas 0,5 metro se estiver devagar.', correct: false },
+                    { text: 'Não há distância fixa, basta buzinar.', correct: false },
+                    { text: 'Basta acelerar rápido para passar logo.', correct: false }
+                ],
+                explanation: 'O Art. 201 determina que ultrapassar ciclista sem guardar a distância lateral mínima de 1,5m é infração média e coloca vidas em risco!'
+            },
+            {
+                id: 'scen_05',
+                topic: 'Veículos de Emergência',
+                article: 'Art. 29, VII do CTB',
+                title: 'Ambulância com Sirene Ligada',
+                description: 'Uma ambulância com alarme sonoro (sirene) e iluminação vermelha intermitente acionada surge no seu retrovisor.',
+                svgType: 'emergency',
+                options: [
+                    { text: 'Deslocar-se para a faixa da direita e parar se necessário.', correct: true },
+                    { text: 'Acelerar para não atrapalhar o fluxo.', correct: false },
+                    { text: 'Ligar o pisca-alerta e continuar na mesma faixa.', correct: false },
+                    { text: 'Frear bruscamente no meio da rua.', correct: false }
+                ],
+                explanation: 'Veículos de emergência têm prioridade total. Os demais condutores devem deixar livre a passagem pela faixa da esquerda, deslocando-se para a direita.'
+            },
+            {
+                id: 'scen_06',
+                topic: 'Pedestres & Faixa',
+                article: 'Art. 70 do CTB',
+                title: 'Pedestre na Faixa sem Semáforo',
+                description: 'Um pedestre colocou o pé na faixa de pedestres para atravessar em uma rua sem semáforo luminoso.',
+                svgType: 'pedestrian',
+                options: [
+                    { text: 'Parar o veículo totalmente e dar prioridade ao pedestre.', correct: true },
+                    { text: 'Buzinar levemente e passar antes dele.', correct: false },
+                    { text: 'Gesticular para o pedestre esperar.', correct: false },
+                    { text: 'Parar apenas se o pedestre for idoso ou criança.', correct: false }
+                ],
+                explanation: 'Os pedestres têm prioridade absoluta de passagem nas faixas delimitadas para esse fim quando não houver sinalização luminosa!'
+            },
+            {
+                id: 'scen_07',
+                topic: 'Direção Defensiva em Chuva',
+                article: 'Direção Defensiva CTB',
+                title: 'Situação de Aquaplanagem',
+                description: 'Chove forte na rodovia e você sente a direção do carro ficar extremamente leve (perda de aderência dos pneus na camada de água). O que fazer?',
+                svgType: 'weather',
+                options: [
+                    { text: 'Tirar suavemente o pé do acelerador e manter o volante firme.', correct: true },
+                    { text: 'Pisar forte e bruscamente no freio.', correct: false },
+                    { text: 'Virar o volante rapidamente para os lados.', correct: false },
+                    { text: 'Puxar o freio de mão imediatamente.', correct: false }
+                ],
+                explanation: 'Na aquaplanagem, nunca pise no freio bruscamente nem vire o volante! Tire o pé do acelerador e mantenha o volante alinhado até os pneus reagruparem no asfalto.'
+            },
+            {
+                id: 'scen_08',
+                topic: 'Distância de Segurança',
+                article: 'Art. 29, II do CTB',
+                title: 'Regra dos 2 Segundos',
+                description: 'Como medir na prática uma distância de seguimento segura em relação ao carro da frente no trânsito urbano ou rodoviário?',
+                svgType: 'distance2s',
+                options: [
+                    { text: 'Escolher um ponto fixo e contar "51, 52" após o carro da frente passar por ele.', correct: true },
+                    { text: 'Manter sempre 2 metros exatos do para-choque.', correct: false },
+                    { text: 'Ficar perto o suficiente para enxergar a placa dele.', correct: false },
+                    { text: 'Olhar apenas para os espelhos laterais.', correct: false }
+                ],
+                explanation: 'A Regra dos 2 Segundos ("cinquenta e um, cinquenta e dois") garante tempo suficiente para reação e frenagem de emergência sem colisão traseira.'
+            },
+            {
+                id: 'scen_09',
+                topic: 'Uso de Faróis',
+                article: 'Art. 40 do CTB',
+                title: 'Farol Baixo de Dia em Rodovias',
+                description: 'Em rodovias de pista simples fora do perímetro urbano, qual a regra sobre os faróis durante o dia?',
+                svgType: 'headlights',
+                options: [
+                    { text: 'É obrigatório manter os faróis baixos acesos mesmo de dia.', correct: true },
+                    { text: 'Apenas a luz de posição (lanterna) basta.', correct: false },
+                    { text: 'Farol só é obrigatório à noite.', correct: false },
+                    { text: 'Deve-se andar de farol alto durante o dia.', correct: false }
+                ],
+                explanation: 'O uso de farol baixo em rodovias de pista simples mesmo durante o dia é exigido por lei para aumentar a visibilidade dos veículos.'
+            },
+            {
+                id: 'scen_10',
+                topic: 'Limites de Velocidade',
+                article: 'Art. 61 do CTB',
+                title: 'Velocidade em Via Arterial',
+                description: 'Qual é a velocidade máxima permitida em uma via urbana arterial quando não houver placas de sinalização?',
+                svgType: 'speedSign',
+                speedVal: '60',
+                options: [
+                    { text: '60 km/h.', correct: true },
+                    { text: '80 km/h.', correct: false },
+                    { text: '40 km/h.', correct: false },
+                    { text: '30 km/h.', correct: false }
+                ],
+                explanation: 'Na ausência de sinalização: Via Local = 30 km/h; Via Coletora = 40 km/h; Via Arterial = 60 km/h; Via de Trânsito Rápido = 80 km/h.'
+            },
+            {
+                id: 'scen_11',
+                topic: 'Estacionamento',
+                article: 'Art. 181, I do CTB',
+                title: 'Estacionar nas Esquinas',
+                description: 'A que distância mínima do bordo do alinhamento da via transversal (esquina) é permitido estacionar o veículo?',
+                svgType: 'parking',
+                options: [
+                    { text: 'No mínimo 5 metros da esquina.', correct: true },
+                    { text: 'No mínimo 2 metros.', correct: false },
+                    { text: 'Pode estacionar logo no canto se não houver faixa amarela.', correct: false },
+                    { text: 'No mínimo 10 metros.', correct: false }
+                ],
+                explanation: 'Estacionar a menos de 5 metros da esquina prejudica a visibilidade dos condutores e é infração média sujeita a guincho/remoção!'
+            },
+            {
+                id: 'scen_12',
+                topic: 'Celular ao Volante',
+                article: 'Art. 252, Parágrafo Único CTB',
+                title: 'Uso do Celular no Sinal Vermelho',
+                description: 'Aguardando a abertura do semáforo com o carro parado, você pega o celular para digitar uma mensagem rápida no WhatsApp.',
+                svgType: 'phoneUsage',
+                options: [
+                    { text: 'É infração gravíssima. Proibido manusear mesmo parado no sinal.', correct: true },
+                    { text: 'Permitido, pois o carro não está em movimento.', correct: false },
+                    { text: 'Permitido se for com viva-voz ou mensagem rápida.', correct: false },
+                    { text: 'Apenas infração leve sem pontos na CNH.', correct: false }
+                ],
+                explanation: 'Manusear ou segurar o celular enquanto conduz o veículo (mesmo parado temporariamente no semáforo) é infração gravíssima com 7 pontos na carteira.'
+            },
+            {
+                id: 'scen_13',
+                topic: 'Pisca-Alerta',
+                article: 'Art. 40, V do CTB',
+                title: 'Uso Correto do Pisca-Alerta',
+                description: 'Em qual destas situações é permitido acionar a luz de advertência (pisca-alerta)?',
+                svgType: 'hazardLights',
+                options: [
+                    { text: 'Em imobilizações ou situações de emergência e locais sinalizados.', correct: true },
+                    { text: 'Ao trafegar rápido sob neblina ou chuva.', correct: false },
+                    { text: 'Para estacionar em local proibido por 5 minutinhos.', correct: false },
+                    { text: 'Ao dar ré na via pública.', correct: false }
+                ],
+                explanation: 'O pisca-alerta só deve ser usado com o veículo imobilizado, em emergências reais ou quando a sinalização expressamente determinar.'
+            },
+            {
+                id: 'scen_14',
+                topic: 'Segurança Infantil',
+                article: 'Art. 64 do CTB / Resolução CONTRAN',
+                title: 'Cadeirinha e Assento de Elevação',
+                description: 'Crianças menores de 10 anos que não atingiram 1,45m de altura devem ser transportadas de que forma?',
+                svgType: 'childSeat',
+                options: [
+                    { text: 'No banco traseiro com dispositivo de retenção adequado à idade/altura.', correct: true },
+                    { text: 'No banco da frente usando o cinto de três pontos.', correct: false },
+                    { text: 'No colo de um adulto responsável no banco traseiro.', correct: false },
+                    { text: 'No banco de trás apenas com o cinto abdominal.', correct: false }
+                ],
+                explanation: 'Menores de 10 anos sem 1,45m devem ir obrigatoriamente no banco traseiro com o equipamento apropriado (bebe conforto, cadeirinha ou assento de elevação).'
+            },
+            {
+                id: 'scen_15',
+                topic: 'Sinal Vermelho',
+                article: 'Art. 44-A do CTB',
+                title: 'Conversão à Direita no Sinal Vermelho',
+                description: 'Você está no semáforo vermelho e quer virar à direita. Quando essa manobra é permitida?',
+                svgType: 'redRightTurn',
+                options: [
+                    { text: 'Apenas onde houver sinalização permissiva ("Livre conversão à direita").', correct: true },
+                    { text: 'Em qualquer cruzamento, desde que dê a preferência aos pedestres.', correct: false },
+                    { text: 'Nunca é permitido sob nenhuma hipótese.', correct: false },
+                    { text: 'Sempre liberado após as 22 horas.', correct: false }
+                ],
+                explanation: 'A conversão à direita no sinal vermelho só é autorizada caso exista placa expressa permitindo a manobra no local.'
+            },
+            {
+                id: 'scen_16',
+                topic: 'Pane Seca',
+                article: 'Art. 180 do CTB',
+                title: 'Falta de Combustível na Via',
+                description: 'Seu carro para no meio de uma avenida movimentada por falta de combustível (pane seca). Qual a consequência legal?',
+                svgType: 'emptyGas',
+                options: [
+                    { text: 'É infração média, sujeita a multa e remoção do veículo.', correct: true },
+                    { text: 'Não é infração, é apenas um imprevisto técnico.', correct: false },
+                    { text: 'Infração leve sem cobrança de taxa de guincho.', correct: false },
+                    { text: 'O guarda de trânsito é obrigado a te fornecer combustível.', correct: false }
+                ],
+                explanation: 'Ter o veículo imobilizado na via por falta de combustível é infração de trânsito média (Art. 180), além de causar transtorno ao tráfego.'
+            },
+            {
+                id: 'scen_17',
+                topic: 'Parada vs Estacionamento',
+                article: 'Art. 47 / Anexo I do CTB',
+                title: 'Diferença entre Parar e Estacionar',
+                description: 'O que caracteriza legalmente uma "Parada" em comparação com um "Estacionamento"?',
+                svgType: 'stopVsPark',
+                options: [
+                    { text: 'Parada é pelo tempo estritamente necessário para embarque/desembarque.', correct: true },
+                    { text: 'Parada é quando o condutor fica dentro do carro ligado por até 15 minutos.', correct: false },
+                    { text: 'Estacionamento é apenas quando o carro fica desligado de noite.', correct: false },
+                    { text: 'Não há diferença legal no CTB.', correct: false }
+                ],
+                explanation: 'Parada = tempo estritamente necessário para embarque ou desembarque de passageiros. Qualquer tempo superior a isso é considerado Estacionamento.'
+            },
+            {
+                id: 'scen_18',
+                topic: 'Preferência em Subidas',
+                article: 'Art. 29, §2º do CTB',
+                title: 'Trecho Íngreme e Estreito',
+                description: 'Em uma ladeira íngreme e estreita sem espaço para dois carros passarem juntos, quem tem a preferência de passagem?',
+                svgType: 'uphill',
+                options: [
+                    { text: 'O veículo que está SUBINDO tem a preferência.', correct: true },
+                    { text: 'O veículo que está descendo, pois está mais rápido.', correct: false },
+                    { text: 'O veículo de maior porte obrigatoriamente.', correct: false },
+                    { text: 'Aquele que der a ré primeiro.', correct: false }
+                ],
+                explanation: 'Nos aclives/declives estreitos, quem está subindo tem a preferência, pois retomar o movimento na subida exige mais tração e segurança.'
+            },
+            {
+                id: 'scen_19',
+                topic: 'Buzina na Cidade',
+                article: 'Art. 227 do CTB',
+                title: 'Uso Correto da Buzina',
+                description: 'Em que situações é permitido acionar a buzina dentro da área urbana?',
+                svgType: 'hornUsage',
+                options: [
+                    { text: 'Em toques breves, como advertência necessária para evitar acidentes.', correct: true },
+                    { text: 'Para saudar conhecidos na calçada.', correct: false },
+                    { text: 'Para apressar o motorista da frente no sinal verde.', correct: false },
+                    { text: 'Livremente entre 22h e 6h.', correct: false }
+                ],
+                explanation: 'A buzina só deve ser usada em toques breves para advertência de segurança. Usar para apressar ou entre 22h e 6h é proibido.'
+            },
+            {
+                id: 'scen_20',
+                topic: 'Sinal Amarelo',
+                article: 'Art. 44 do CTB',
+                title: 'Semáforo na Luz Amarela',
+                description: 'Ao se aproximar do cruzamento, o semáforo muda de verde para amarelo. Como proceder com segurança?',
+                svgType: 'yellowLight',
+                options: [
+                    { text: 'Parar com segurança antes da faixa; só prosseguir se a parada for perigosa.', correct: true },
+                    { text: 'Acelerar fundo para cruzar rápido antes do vermelho.', correct: false },
+                    { text: 'Engatar a ré e voltar.', correct: false },
+                    { text: 'Parar em cima da faixa de pedestres.', correct: false }
+                ],
+                explanation: 'O sinal amarelo indica atenção! O condutor deve parar, a menos que já esteja cruzando a via e a frenagem seja perigosa.'
+            },
+            {
+                id: 'scen_21',
+                topic: 'Lei Seca',
+                article: 'Art. 165 do CTB',
+                title: 'Álcool e Direção',
+                description: 'Qual a tolerância de álcool no sangue permitida para quem vai dirigir segundo a legislação brasileira?',
+                svgType: 'zeroAlcohol',
+                options: [
+                    { text: 'Tolerância ZERO para qualquer quantidade de álcool.', correct: true },
+                    { text: 'Permitido até 1 copo de cerveja.', correct: false },
+                    { text: 'Permitido se beber com refeição pesada.', correct: false },
+                    { text: 'Tolerância de até 2 taças de vinho para experientes.', correct: false }
+                ],
+                explanation: 'A Lei Seca no Brasil adota tolerância zero. Dirigir sob efeito de álcool é infração gravíssima (multa x10 e suspensão por 12 meses).'
+            },
+            {
+                id: 'scen_22',
+                topic: 'Entrada em Rodovias',
+                article: 'Art. 29, X do CTB',
+                title: 'Faixa de Aceleração em Rodovias',
+                description: 'Você está entrando em uma rodovia pela faixa de aceleração. De quem é a prioridade?',
+                svgType: 'highwayMerge',
+                options: [
+                    { text: 'Dos veículos que já estão circulando na rodovia.', correct: true },
+                    { text: 'Sua, pois você está entrando com velocidade.', correct: false },
+                    { text: 'De quem piscar o farol primeiro.', correct: false },
+                    { text: 'Sua, pois quem vem na rodovia é obrigado a mudar de faixa.', correct: false }
+                ],
+                explanation: 'Os veículos que ingressam na rodovia vindos de faixas de acesso devem dar preferência aos que já trafegam pela pista principal.'
+            },
+            {
+                id: 'scen_23',
+                topic: 'Uso do Acostamento',
+                article: 'Art. 193 do CTB',
+                title: 'Trânsito no Acostamento',
+                description: 'O trânsito na estrada está parado por conta de engarrafamento. É permitido andar pelo acostamento?',
+                svgType: 'shoulderRoad',
+                options: [
+                    { text: 'Proibido. Reservado apenas para emergências ou parada imediata.', correct: true },
+                    { text: 'Permitido se a velocidade for até 20 km/h.', correct: false },
+                    { text: 'Permitido para pegar a próxima saída próxima.', correct: false },
+                    { text: 'Liberado para motos e SUVs.', correct: false }
+                ],
+                explanation: 'Trafegar ou ultrapassar pelo acostamento é infração gravíssima com multa gravada (x3 ou x5), gerando enorme risco aos pedestres e socorristas.'
+            },
+            {
+                id: 'scen_24',
+                topic: 'Luzes Queimadas',
+                article: 'Art. 230, XXII do CTB',
+                title: 'Luz de Freio ou Pisca Queimado',
+                description: 'Qual é a penalidade prevista ao transitar com lâmpadas de freio ou farol defeituosas no veículo?',
+                svgType: 'brokenLight',
+                options: [
+                    { text: 'Infração média com aplicação de multa.', correct: true },
+                    { text: 'Apenas um aviso verbal da polícia.', correct: false },
+                    { text: 'Apreensão imediata do veículo por 30 dias.', correct: false },
+                    { text: 'Perda definitiva da CNH.', correct: false }
+                ],
+                explanation: 'Transitar com defeito no sistema de iluminação ou sinalização é infração média. Mantenha as lâmpadas sempre revisadas!'
+            },
+            {
+                id: 'scen_25',
+                topic: 'Ciclomotores (Cinquetinhas)',
+                article: 'Art. 57 do CTB',
+                title: 'Circulação de Ciclomotores',
+                description: 'Onde devem circular prioritariamente os ciclomotores (até 50cc) nas vias urbanas?',
+                svgType: 'moped',
+                options: [
+                    { text: 'Na faixa mais à direita da pista de rolamento.', correct: true },
+                    { text: 'Nas calçadas junto aos pedestres.', correct: false },
+                    { text: 'Na faixa da esquerda em alta velocidade.', correct: false },
+                    { text: 'Em cima do canteiro central.', correct: false }
+                ],
+                explanation: 'Os ciclomotores devem conduzir-se pela direita da pista, sendo expressamente proibidos de andar em calçadas ou vias de trânsito rápido.'
+            },
+            {
+                id: 'scen_26',
+                topic: 'Cinto de Segurança',
+                article: 'Art. 65 / Art. 167 do CTB',
+                title: 'Obrigatoriedade do Cinto',
+                description: 'Se o passageiro do banco traseiro recusa usar o cinto de segurança, de quem é a responsabilidade pela infração?',
+                svgType: 'seatbelt',
+                options: [
+                    { text: 'Do condutor do veículo.', correct: true },
+                    { text: 'Do próprio passageiro exclusivamente.', correct: false },
+                    { text: 'Do fabricante do automóvel.', correct: false },
+                    { text: 'Ninguém é punido se estiver no banco de trás.', correct: false }
+                ],
+                explanation: 'O motorista é responsável pela segurança de todos os ocupantes. O não uso do cinto por qualquer passageiro gera infração grave ao condutor.'
+            },
+            {
+                id: 'scen_27',
+                topic: 'Triângulo de Sinalização',
+                article: 'Resolução CONTRAN nº 36',
+                title: 'Distância do Triângulo de Segurança',
+                description: 'Em caso de pane em rodovia (velocidade máx. 80 km/h), a que distância mínima do veículo deve ser posicionado o triângulo?',
+                svgType: 'triangleDist',
+                options: [
+                    { text: 'No mínimo a 30 metros (ou 80 passos em pista rápida) do veículo.', correct: true },
+                    { text: 'Colocado logo no para-choque traseiro.', correct: false },
+                    { text: 'A apenas 5 metros de distância.', correct: false },
+                    { text: 'Não precisa usar se ligar o alerta.', correct: false }
+                ],
+                explanation: 'O triângulo deve ser colocado a uma distância correspondente à velocidade da via (ex: 80 km/h = 80 metros/passos) para dar tempo de reação aos outros carros!'
+            }
+        ];
+
+        /**
+         * Unlockable Cars for Garage
+         */
+        const GARAGE_CARS = [
+            { id: 'fusca', name: 'Fusquinha Retrô Amarelo', icon: '🚗', price: 0, desc: 'Clássico simpático para começar a jornada.' },
+            { id: 'hatch', name: 'Hatch Urbano Azul', icon: '🚘', price: 200, desc: 'Compacto, ágil e perfeito para balizas urbanas.' },
+            { id: 'sedan', name: 'Sedan Prata Família', icon: '🚙', price: 500, desc: 'Conforto total para viagens com a família toda.' },
+            { id: 'suv', name: 'SUV Vermelho Aventura', icon: '🛻', price: 1000, desc: 'Imponente e seguro com tração reforçada.' },
+            { id: 'eletrico', name: 'Futurista Elétrico Verde', icon: '⚡', price: 2000, desc: 'Silencioso, ecológico e recheado de tecnologia.' },
+            { id: 'esportivo', name: 'Esportivo Dourado Elite', icon: '🏎️', price: 5000, desc: 'A recompensa máxima da Mestre do CTB!' }
+        ];
+
+        /**
+         * Trophies List
+         */
+        const TROPHIES = [
+            { id: 'tr_first', title: 'Primeira Habilitação', icon: '🔰', desc: 'Completar o seu primeiro cenário no CTB.' },
+            { id: 'tr_streak', title: 'Olhar de Lince', icon: '🔥', desc: 'Acertar 5 cenários seguidos sem errar.' },
+            { id: 'tr_roundabout', title: 'Rainha da Rotatória', icon: '🌀', desc: 'Dominar todas as questões sobre preferências e rotatórias.' },
+            { id: 'tr_pedestrian', title: 'Anjo dos Pedestres', icon: '🛡️', desc: 'Gabaritar regras de travessia e ciclistas.' },
+            { id: 'tr_garage', title: 'Garagem Ostentação', icon: '🚘', desc: 'Desbloquear pelo menos 3 carros na garagem.' },
+            { id: 'tr_master', title: 'Mestre da Direção Defensiva', icon: '👑', desc: 'Alcançar o Nível 5 de Mestre do CTB!' }
+        ];
+    </script>
+
+    <script>
+        /**
+         * Dynamic 2D SVG Illustration Generator
+         */
+        function generateScenarioSVG(scen) {
+            const type = scen.svgType || 'crossroad';
+
+            if (type === 'crossroad') {
+                return `
+                <svg viewBox="0 0 400 300" class="w-full h-full">
+                    <!-- Road Intersection background -->
+                    <rect width="400" height="300" fill="#1e2329"/>
+                    <!-- Roads -->
+                    <rect x="150" y="0" width="100" height="300" fill="#121518"/>
+                    <rect x="0" y="100" width="400" height="100" fill="#121518"/>
+                    <!-- Dashed Lines -->
+                    <line x1="200" y1="0" x2="200" y2="100" stroke="#ffd166" stroke-width="3" stroke-dasharray="8,8"/>
+                    <line x1="200" y1="200" x2="200" y2="300" stroke="#ffd166" stroke-width="3" stroke-dasharray="8,8"/>
+                    <line x1="0" y1="150" x2="150" y2="150" stroke="#ffd166" stroke-width="3" stroke-dasharray="8,8"/>
+                    <line x1="250" y1="150" x2="400" y2="150" stroke="#ffd166" stroke-width="3" stroke-dasharray="8,8"/>
+                    <!-- Car A (Vermelho) - Right side -->
+                    <g transform="translate(260, 160)">
+                        <rect width="45" height="26" rx="6" fill="#ef476f"/>
+                        <text x="22" y="17" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">A</text>
+                        <!-- Arrow -->
+                        <path d="M -15 13 L -5 13 M -10 8 L -5 13 L -10 18" stroke="#06d6a0" stroke-width="3" fill="none"/>
+                    </g>
+                    <!-- Car B (Azul) - Bottom side -->
+                    <g transform="translate(160, 220) rotate(-90)">
+                        <rect width="45" height="26" rx="6" fill="#118ab2"/>
+                        <text x="22" y="17" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">B</text>
+                        <!-- Arrow -->
+                        <path d="M -15 13 L -5 13 M -10 8 L -5 13 L -10 18" stroke="#06d6a0" stroke-width="3" fill="none"/>
+                    </g>
+                    <!-- Right indicator symbol -->
+                    <text x="320" y="140" fill="#ffd166" font-size="12" font-weight="bold">👉 Direita de B</text>
+                </svg>`;
+            }
+
+            if (type === 'roundabout') {
+                return `
+                <svg viewBox="0 0 400 300" class="w-full h-full">
+                    <rect width="400" height="300" fill="#1e2329"/>
+                    <!-- Roundabout road -->
+                    <circle cx="200" cy="150" r="110" fill="#121518"/>
+                    <circle cx="200" cy="150" r="50" fill="#1e2329"/>
+                    <circle cx="200" cy="150" r="48" stroke="#06d6a0" stroke-width="3" fill="none" stroke-dasharray="6,6"/>
+                    <!-- Access Roads -->
+                    <rect x="0" y="125" width="90" height="50" fill="#121518"/>
+                    <rect x="310" y="125" width="90" height="50" fill="#121518"/>
+                    <!-- Car Amarelo Inside -->
+                    <g transform="translate(190, 60) rotate(10)">
+                        <rect width="42" height="24" rx="5" fill="#ffd166"/>
+                        <text x="21" y="16" fill="#121518" font-size="10" font-weight="bold" text-anchor="middle">Amarelo</text>
+                    </g>
+                    <!-- Car Verde Entering -->
+                    <g transform="translate(320, 138)">
+                        <rect width="42" height="24" rx="5" fill="#06d6a0"/>
+                        <text x="21" y="16" fill="#121518" font-size="10" font-weight="bold" text-anchor="middle">Verde</text>
+                        <path d="M -15 12 L -5 12" stroke="#ef476f" stroke-width="3"/>
+                    </g>
+                </svg>`;
+            }
+
+            if (type === 'doubleLine') {
+                return `
+                <svg viewBox="0 0 400 300" class="w-full h-full">
+                    <rect width="400" height="300" fill="#121518"/>
+                    <!-- Double yellow solid lines -->
+                    <line x1="0" y1="147" x2="400" y2="147" stroke="#ffd166" stroke-width="4"/>
+                    <line x1="0" y1="153" x2="400" y2="153" stroke="#ffd166" stroke-width="4"/>
+                    <!-- Truck & Car -->
+                    <rect x="220" y="170" width="90" height="40" rx="4" fill="#6c757d"/>
+                    <text x="265" y="195" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle">Caminhão</text>
+                    <rect x="80" y="175" width="50" height="30" rx="5" fill="#ef476f"/>
+                    <text x="105" y="195" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">Seu Carro</text>
+                    <text x="200" y="60" fill="#ef476f" font-size="18" font-weight="black" text-anchor="middle">🚫 PROIBIDO ULTRAPASSAR</text>
+                </svg>`;
+            }
+
+            if (type === 'cyclist') {
+                return `
+                <svg viewBox="0 0 400 300" class="w-full h-full">
+                    <rect width="400" height="300" fill="#121518"/>
+                    <line x1="0" y1="20" x2="400" y2="20" stroke="#fff" stroke-width="4"/>
+                    <line x1="0" y1="280" x2="400" y2="280" stroke="#fff" stroke-width="4"/>
+                    <!-- Cyclist -->
+                    <text x="220" y="80" font-size="32">🚴</text>
+                    <!-- Car -->
+                    <rect x="180" y="180" width="70" height="40" rx="8" fill="#118ab2"/>
+                    <!-- Distance Dimension line -->
+                    <line x1="230" y1="95" x2="230" y2="175" stroke="#ffd166" stroke-width="3" stroke-dasharray="4,4"/>
+                    <text x="245" y="140" fill="#ffd166" font-size="16" font-weight="extrabold">↔ 1,5 M</text>
+                </svg>`;
+            }
+
+            if (type === 'pedestrian') {
+                return `
+                <svg viewBox="0 0 400 300" class="w-full h-full">
+                    <rect width="400" height="300" fill="#121518"/>
+                    <!-- Crosswalk stripes -->
+                    <g fill="#ffffff">
+                        <rect x="180" y="20" width="25" height="260"/>
+                        <rect x="220" y="20" width="25" height="260"/>
+                        <rect x="260" y="20" width="25" height="260"/>
+                    </g>
+                    <!-- Pedestrian -->
+                    <text x="210" y="160" font-size="38">🚶‍♀️</text>
+                    <!-- Stopped Car -->
+                    <rect x="60" y="120" width="70" height="40" rx="8" fill="#06d6a0"/>
+                    <text x="95" y="145" fill="#121518" font-size="11" font-weight="extrabold" text-anchor="middle">PARADO</text>
+                </svg>`;
+            }
+
+            if (type === 'speedSign') {
+                const val = scen.speedVal || '60';
+                return `
+                <svg viewBox="0 0 400 300" class="w-full h-full">
+                    <rect width="400" height="300" fill="#1e2329"/>
+                    <!-- Road -->
+                    <polygon points="120,300 280,300 220,120 180,120" fill="#121518"/>
+                    <!-- Speed Limit Sign -->
+                    <circle cx="310" cy="110" r="45" fill="#ffffff" stroke="#ef476f" stroke-width="12"/>
+                    <text x="310" y="122" fill="#000000" font-size="36" font-weight="900" text-anchor="middle">${val}</text>
+                    <text x="310" y="142" fill="#000000" font-size="10" font-weight="bold" text-anchor="middle">km/h</text>
+                </svg>`;
+            }
+
+            // Default Generic Graphic
+            return `
+            <svg viewBox="0 0 400 300" class="w-full h-full">
+                <rect width="400" height="300" fill="#121518"/>
+                <circle cx="200" cy="150" r="70" fill="#272d36" stroke="#ffd166" stroke-width="4"/>
+                <text x="200" y="145" fill="#ffd166" font-size="42" text-anchor="middle">🛡️</text>
+                <text x="200" y="185" fill="#fff" font-size="14" font-weight="bold" text-anchor="middle">Código de Trânsito</text>
+            </svg>`;
+        }
+    </script>
+
+    <script>
+        /**
+         * Main Application State & Game Logic Engine
+         */
+        class AutoEscolaApp {
+            constructor() {
+                this.state = {
+                    userName: 'Motorista Querida',
+                    xp: 0,
+                    coins: 0,
+                    level: 1,
+                    streak: 0,
+                    selectedCar: 'fusca',
+                    unlockedCars: ['fusca'],
+                    unlockedTrophies: ['tr_first'],
+                    errorHistory: {}, // { scenarioId: failCount }
+                    correctHistory: {},
+                    cooldownQueue: [], // Array of scenario IDs on cooldown
+                    currentScenarioIndex: 0,
+                    currentMode: 'jornada', // 'jornada', 'simulado', 'errors'
+                    simuladoQuestions: [],
+                    hazardScore: 0
+                };
+
+                this.STORAGE_KEY = 'autoEscola_gameState_v1';
+            }
+
+            init() {
+                this.loadState();
+                this.updateUIHeader();
+                this.checkNamePrompt();
+                this.renderGarage();
+                this.renderTrophies();
+                this.renderErrorNotebook();
+                this.initConfetti();
+            }
+
+            loadState() {
+                const saved = localStorage.getItem(this.STORAGE_KEY);
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        this.state = { ...this.state, ...parsed };
+                    } catch (e) {
+                        console.error('Error loading state from LocalStorage', e);
+                    }
+                }
+            }
+
+            saveState() {
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.state));
+                this.updateUIHeader();
+            }
+
+            checkNamePrompt() {
+                if (!this.state.userName || this.state.userName === 'Motorista Querida') {
+                    setTimeout(() => {
+                        this.showModal(
+                            '👋 Boas-vindas à AutoEscola!',
+                            'Para personalizarmos seu Certificado e conquistas, digite seu nome de motorista:',
+                            '🚘',
+                            true,
+                            () => {
+                                const input = document.getElementById('modalInputName');
+                                if (input && input.value.trim()) {
+                                    this.state.userName = input.value.trim();
+                                    this.saveState();
+                                }
+                            }
+                        );
+                    }, 500);
+                }
+            }
+
+            updateUIHeader() {
+                const carObj = GARAGE_CARS.find(c => c.id === this.state.selectedCar) || GARAGE_CARS[0];
+                document.getElementById('headerAvatarCar').innerText = carObj.icon;
+                document.getElementById('headerUserName').innerText = this.state.userName;
+                document.getElementById('headerCoins').innerText = this.state.coins;
+
+                // Level Calc (Every 200 XP = 1 Level up to lvl 5)
+                const currentLvl = Math.min(5, Math.floor(this.state.xp / 200) + 1);
+                this.state.level = currentLvl;
+
+                const levelTitles = [
+                    'Nível 1 • Aprendiz 🔰',
+                    'Nível 2 • Habilitada PPD 🚘',
+                    'Nível 3 • Motorista Defensiva 🛡️',
+                    'Nível 4 • Especialista Urbana 🏆',
+                    'Nível 5 • Mestre do CTB 👑'
+                ];
+
+                document.getElementById('headerLevelBadge').innerText = levelTitles[currentLvl - 1];
+
+                // XP Bar percentage
+                const xpInCurrentLvl = this.state.xp % 200;
+                const pct = Math.min(100, Math.floor((xpInCurrentLvl / 200) * 100));
+                document.getElementById('headerXpBar').style.width = pct + '%';
+                document.getElementById('headerXpText').innerText = `${xpInCurrentLvl}/200 XP`;
+
+                // Badge pending errors count
+                const errCount = Object.keys(this.state.errorHistory).length;
+                const badge = document.getElementById('badgePendingErrors');
+                if (badge) badge.innerText = errCount;
+
+                // Trophies count
+                const trCount = document.getElementById('menuTrophyCount');
+                if (trCount) trCount.innerText = `${this.state.unlockedTrophies.length}/${TROPHIES.length}`;
+
+                // Check trophy unlock conditions
+                if (currentLvl >= 5 && !this.state.unlockedTrophies.includes('tr_master')) {
+                    this.unlockTrophy('tr_master');
+                }
+            }
+
+            showScreen(screenId) {
+                document.querySelectorAll('.page-screen').forEach(el => {
+                    el.classList.remove('active');
+                });
+                const target = document.getElementById(screenId);
+                if (target) {
+                    target.classList.add('active');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+
+                if (screenId === 'screen-garage') this.renderGarage();
+                if (screenId === 'screen-trophies') this.renderTrophies();
+                if (screenId === 'screen-errors') this.renderErrorNotebook();
+                if (screenId === 'screen-certificate') this.updateCertificateData();
+            }
+
+            // ================= SCENARIO / QUIZ RUNNER =================
+            startJornada() {
+                this.state.currentMode = 'jornada';
+                this.state.currentScenarioIndex = 0;
+                document.getElementById('quizModeTitle').innerText = 'JORNADA DO CTB';
+                this.loadCurrentScenario();
+                this.showScreen('screen-quiz');
+            }
+
+            startSimulado() {
+                this.state.currentMode = 'simulado';
+                // Pick 10 random scenarios
+                const shuffled = [...SCENARIOS].sort(() => 0.5 - Math.random());
+                this.state.simuladoQuestions = shuffled.slice(0, 10);
+                this.state.currentScenarioIndex = 0;
+                document.getElementById('quizModeTitle').innerText = 'SIMULADO RÁPIDO (10 QUESTÕES)';
+                this.loadCurrentScenario();
+                this.showScreen('screen-quiz');
+            }
+
+            getCurrentScenarioObject() {
+                if (this.state.currentMode === 'simulado') {
+                    return this.state.simuladoQuestions[this.state.currentScenarioIndex];
+                }
+                return SCENARIOS[this.state.currentScenarioIndex];
+            }
+
+            loadCurrentScenario() {
+                const scen = this.getCurrentScenarioObject();
+                if (!scen) {
+                    this.finishQuizMode();
+                    return;
+                }
+
+                // Update Quiz HUD
+                const total = this.state.currentMode === 'simulado' ? 10 : SCENARIOS.length;
+                document.getElementById('quizProgressText').innerText = `Cenário ${this.state.currentScenarioIndex + 1} de ${total}`;
+                document.getElementById('quizStreakCount').innerText = this.state.streak;
+                document.getElementById('quizTopicBadge').innerText = scen.topic;
+                document.getElementById('quizCtbArticle').innerText = scen.article;
+                document.getElementById('quizTitle').innerText = scen.title;
+                document.getElementById('quizDescription').innerText = scen.description;
+
+                // Render dynamic SVG
+                document.getElementById('svgContainer').innerHTML = generateScenarioSVG(scen);
+
+                // Render Option Buttons
+                const container = document.getElementById('quizOptionsContainer');
+                container.innerHTML = '';
+                document.getElementById('quizFeedbackBox').classList.add('hidden');
+
+                // Shuffle options for variety
+                const shuffledOpts = [...scen.options].sort(() => 0.5 - Math.random());
+
+                shuffledOpts.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full text-left p-4 rounded-xl bg-asfaltoCard border border-slate-700 hover:border-sinalAmarelo hover:bg-slate-800 font-semibold text-xs sm:text-sm text-slate-200 transition-all flex items-center justify-between group";
+                    btn.innerHTML = `
+                        <span>${opt.text}</span>
+                        <i class="fa-regular fa-circle text-slate-500 group-hover:text-sinalAmarelo"></i>
+                    `;
+                    btn.onclick = () => this.handleAnswer(opt, scen, btn);
+                    container.appendChild(btn);
+                });
+            }
+
+            handleAnswer(opt, scen, selectedBtn) {
+                // Disable all option buttons
+                const container = document.getElementById('quizOptionsContainer');
+                const buttons = container.querySelectorAll('button');
+                buttons.forEach(b => b.disabled = true);
+
+                const feedbackBox = document.getElementById('quizFeedbackBox');
+                const feedbackIcon = document.getElementById('feedbackIcon');
+                const feedbackTitle = document.getElementById('feedbackTitle');
+                const feedbackExp = document.getElementById('feedbackExplanation');
+
+                if (opt.correct) {
+                    soundFX.playSuccess();
+                    selectedBtn.classList.remove('bg-asfaltoCard', 'border-slate-700');
+                    selectedBtn.classList.add('bg-emerald-500/20', 'border-sinalVerde', 'text-sinalVerde');
+
+                    // Streak & XP calculations
+                    this.state.streak += 1;
+                    const comboMult = this.state.streak >= 5 ? 2 : (this.state.streak >= 3 ? 1.5 : 1);
+                    const baseXP = 50;
+                    const gainedXP = Math.floor(baseXP * comboMult);
+                    const gainedCoins = 20;
+
+                    this.state.xp += gainedXP;
+                    this.state.coins += gainedCoins;
+
+                    if (this.state.streak >= 5) {
+                        this.unlockTrophy('tr_streak');
+                    }
+
+                    feedbackBox.className = "mt-6 p-4 rounded-xl border border-sinalVerde bg-emerald-500/10 animate-fadeIn";
+                    feedbackIcon.innerText = "✅";
+                    feedbackTitle.innerText = `Excelente! Resposta Correta (+${gainedXP} XP / +${gainedCoins} Moedas)`;
+                    feedbackTitle.className = "font-extrabold text-sm sm:text-base mb-1 text-sinalVerde";
+                    
+                    // Remove from error history if present
+                    delete this.state.errorHistory[scen.id];
+                } else {
+                    soundFX.playError();
+                    selectedBtn.classList.remove('bg-asfaltoCard', 'border-slate-700');
+                    selectedBtn.classList.add('bg-rose-500/20', 'border-sinalVermelho', 'text-sinalVermelho');
+
+                    this.state.streak = 0; // Reset streak
+                    
+                    // Register Error for Spaced Repetition queue
+                    this.state.errorHistory[scen.id] = (this.state.errorHistory[scen.id] || 0) + 1;
+
+                    feedbackBox.className = "mt-6 p-4 rounded-xl border border-sinalVermelho bg-rose-500/10 animate-fadeIn";
+                    feedbackIcon.innerText = "💡";
+                    feedbackTitle.innerText = "Não se preocupe! Errar aqui é a melhor forma de aprender!";
+                    feedbackTitle.className = "font-extrabold text-sm sm:text-base mb-1 text-sinalVermelho";
+                }
+
+                // Article & CTB Explanation
+                feedbackExp.innerText = scen.explanation;
+                feedbackBox.classList.remove('hidden');
+
+                // Unlock First Trophy
+                if (!this.state.unlockedTrophies.includes('tr_first')) {
+                    this.unlockTrophy('tr_first');
+                }
+
+                this.saveState();
+            }
+
+            nextScenario() {
+                this.state.currentScenarioIndex += 1;
+                this.loadCurrentScenario();
+            }
+
+            finishQuizMode() {
+                soundFX.playLevelUp();
+                this.triggerConfetti();
+                this.showModal(
+                    '🎉 Módulo Concluído com Sucesso!',
+                    `Você concluiu as questões com maestria! Seu progresso e moedas foram salvos no seu perfil.`,
+                    '🏆',
+                    false,
+                    () => this.showScreen('screen-menu')
+                );
+            }
+
+            // ================= HAZARD MINI-GAME =================
+            startHazardGame() {
+                this.showScreen('screen-hazard');
+                this.initHazardGame();
+            }
+
+            initHazardGame() {
+                const area = document.getElementById('hazardPlayArea');
+                area.innerHTML = '';
+                this.state.hazardScore = 0;
+                document.getElementById('hazardFoundCount').innerText = `0 / 4`;
+
+                // SVG Background Scene
+                area.innerHTML = `
+                    <svg viewBox="0 0 800 450" class="w-full h-full object-cover">
+                        <rect width="800" height="450" fill="#121518"/>
+                        <!-- Street -->
+                        <polygon points="100,450 700,450 500,180 300,180" fill="#1e2329"/>
+                        <line x1="400" y1="450" x2="400" y2="180" stroke="#ffd166" stroke-width="6" stroke-dasharray="15,15"/>
+                        <!-- Sidewalks -->
+                        <polygon points="0,450 100,450 300,180 0,180" fill="#272d36"/>
+                        <polygon points="700,450 800,450 800,180 500,180" fill="#272d36"/>
+                        <!-- Parked Van -->
+                        <rect x="520" y="240" width="120" height="70" rx="8" fill="#4a5568"/>
+                        <!-- Wet oil patch -->
+                        <ellipse cx="350" cy="380" rx="45" ry="15" fill="#334155" opacity="0.8"/>
+                    </svg>
+                `;
+
+                // Clickable Hazard Targets (Positioned absolutely)
+                const hazards = [
+                    { id: 'h1', icon: '🚶‍♂️', title: 'Pedestre atrás da Van', top: '50%', left: '72%' },
+                    { id: 'h2', icon: '🛢️', title: 'Mancha de Óleo na Pista', top: '80%', left: '42%' },
+                    { id: 'h3', icon: '🚴‍♀️', title: 'Ciclista na Contra-Mão', top: '42%', left: '32%' },
+                    { id: 'h4', icon: '🚪', title: 'Porta do Carro Abrindo', top: '65%', left: '18%' }
+                ];
+
+                hazards.forEach(h => {
+                    const elem = document.createElement('div');
+                    elem.className = "absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2 text-3xl sm:text-4xl p-2 rounded-full bg-rose-500/20 border-2 border-sinalVermelho hover:scale-125 transition-transform animate-pulse";
+                    elem.style.top = h.top;
+                    elem.style.left = h.left;
+                    elem.title = h.title;
+                    elem.innerHTML = h.icon;
+                    elem.onclick = (e) => {
+                        e.stopPropagation();
+                        this.foundHazard(elem, h);
+                    };
+                    area.appendChild(elem);
+                });
+
+                // Start Timer
+                let timeLeft = 20;
+                document.getElementById('hazardTimer').innerText = `${timeLeft}s`;
+                clearInterval(this.hazardInterval);
+                this.hazardInterval = setInterval(() => {
+                    timeLeft -= 1;
+                    document.getElementById('hazardTimer').innerText = `${timeLeft}s`;
+                    if (timeLeft <= 0) {
+                        clearInterval(this.hazardInterval);
+                        if (this.state.hazardScore < 4) {
+                            soundFX.playError();
+                            this.showModal('⏰ Tempo Esgotado!', 'Algumas ameaças passaram despercebidas. Tente novamente!', '⚠️');
+                        }
+                    }
+                }, 1000);
+            }
+
+            foundHazard(elem, hazard) {
+                soundFX.playCoin();
+                elem.remove();
+                this.state.hazardScore += 1;
+                document.getElementById('hazardFoundCount').innerText = `${this.state.hazardScore} / 4`;
+
+                if (this.state.hazardScore >= 4) {
+                    clearInterval(this.hazardInterval);
+                    soundFX.playLevelUp();
+                    this.state.xp += 100;
+                    this.state.coins += 50;
+                    this.saveState();
+                    this.triggerConfetti();
+                    this.showModal('🎯 Visão Tática Perfeita!', 'Você identificou todos os perigos potenciais na pista! (+100 XP / +50 Moedas)', '🛡️');
+                }
+            }
+
+            // ================= GARAGE & CUSTOMIZATION =================
+            renderGarage() {
+                const grid = document.getElementById('garageGrid');
+                if (!grid) return;
+                grid.innerHTML = '';
+
+                document.getElementById('garageDriverName').innerText = this.state.userName;
+                const activeCarObj = GARAGE_CARS.find(c => c.id === this.state.selectedCar) || GARAGE_CARS[0];
+                document.getElementById('garageDriverAvatar').innerText = activeCarObj.icon;
+
+                GARAGE_CARS.forEach(car => {
+                    const isUnlocked = this.state.unlockedCars.includes(car.id);
+                    const isSelected = this.state.selectedCar === car.id;
+
+                    const card = document.createElement('div');
+                    card.className = `glass-card rounded-2xl p-5 border flex flex-col justify-between ${isSelected ? 'border-sinalAmarelo bg-amber-500/10' : 'border-slate-700/60'}`;
+                    
+                    card.innerHTML = `
+                        <div>
+                            <div class="text-5xl text-center mb-3">${car.icon}</div>
+                            <h3 class="font-black text-white text-base text-center mb-1">${car.name}</h3>
+                            <p class="text-xs text-slate-400 text-center mb-4 leading-relaxed">${car.desc}</p>
+                        </div>
+                        <div class="pt-3 border-t border-slate-800 text-center">
+                            ${isSelected ? 
+                                `<span class="px-3 py-1.5 rounded-xl bg-sinalAmarelo text-asfalto font-extrabold text-xs inline-block">Em Uso</span>` :
+                                (isUnlocked ?
+                                    `<button onclick="app.selectCar('${car.id}')" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-600">Selecionar</button>` :
+                                    `<button onclick="app.buyCar('${car.id}', ${car.price})" class="w-full py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-asfalto font-extrabold text-xs shadow-md">Comprar por 🪙 ${car.price}</button>`
+                                )
+                            }
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            buyCar(carId, price) {
+                if (this.state.coins >= price) {
+                    this.state.coins -= price;
+                    this.state.unlockedCars.push(carId);
+                    this.state.selectedCar = carId;
+                    soundFX.playLevelUp();
+                    
+                    if (this.state.unlockedCars.length >= 3) {
+                        this.unlockTrophy('tr_garage');
+                    }
+
+                    this.saveState();
+                    this.renderGarage();
+                    this.showModal('🏎️ Novo Veículo Adquirido!', 'Seu novo carro já está selecionado para o seu perfil!', '🎉');
+                } else {
+                    soundFX.playError();
+                    this.showModal('🪙 Moedas Insuficientes', 'Continue jogando os cenários para acumular mais moedas do trânsito!', '⚠️');
+                }
+            }
+
+            selectCar(carId) {
+                this.state.selectedCar = carId;
+                soundFX.playCoin();
+                this.saveState();
+                this.renderGarage();
+            }
+
+            // ================= TROPHIES ROOM =================
+            renderTrophies() {
+                const grid = document.getElementById('trophiesGrid');
+                if (!grid) return;
+                grid.innerHTML = '';
+
+                TROPHIES.forEach(tr => {
+                    const unlocked = this.state.unlockedTrophies.includes(tr.id);
+                    const card = document.createElement('div');
+                    card.className = `glass-card rounded-2xl p-5 border ${unlocked ? 'border-sinalAmarelo/50 bg-amber-500/5' : 'border-slate-800 opacity-50 grayscale'}`;
+                    
+                    card.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <div class="text-4xl">${tr.icon}</div>
+                            <div>
+                                <h4 class="font-extrabold text-white text-sm mb-1">${tr.title}</h4>
+                                <p class="text-xs text-slate-400 leading-relaxed">${tr.desc}</p>
+                                <span class="text-[10px] font-bold ${unlocked ? 'text-sinalAmarelo' : 'text-slate-500'} mt-1 block">
+                                    ${unlocked ? '✓ Desbloqueado' : '🔒 Bloqueado'}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            unlockTrophy(trId) {
+                if (!this.state.unlockedTrophies.includes(trId)) {
+                    this.state.unlockedTrophies.push(trId);
+                    soundFX.playLevelUp();
+                    this.triggerConfetti();
+                    const tr = TROPHIES.find(t => t.id === trId);
+                    if (tr) {
+                        this.showModal(`🏆 Troféu Desbloqueado: ${tr.title}`, tr.desc, tr.icon);
+                    }
+                    this.saveState();
+                }
+            }
+
+            // ================= ERROR REVISION NOTEBOOK =================
+            renderErrorNotebook() {
+                const container = document.getElementById('errorNotebookContent');
+                if (!container) return;
+
+                const errorIds = Object.keys(this.state.errorHistory);
+
+                if (errorIds.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-12">
+                            <div class="text-6xl mb-3">🌟</div>
+                            <h3 class="text-lg font-bold text-white mb-1">Caderno de Erros Limpo!</h3>
+                            <p class="text-xs text-slate-400">Você não tem nenhuma questão pendente para revisão no momento. Excelente!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = '<div class="space-y-4"></div>';
+                const list = container.querySelector('div');
+
+                errorIds.forEach(id => {
+                    const scen = SCENARIOS.find(s => s.id === id);
+                    if (!scen) return;
+
+                    const item = document.createElement('div');
+                    item.className = "glass-card rounded-2xl p-5 border border-rose-500/30 bg-rose-500/5";
+                    item.innerHTML = `
+                        <div class="flex items-start justify-between gap-3 mb-2">
+                            <div>
+                                <span class="px-2 py-0.5 rounded bg-rose-500/20 text-sinalVermelho text-[10px] font-bold uppercase">${scen.topic}</span>
+                                <h4 class="font-extrabold text-white text-base mt-1">${scen.title}</h4>
+                            </div>
+                            <span class="text-xs font-bold text-sinalVermelho">${this.state.errorHistory[id]}x Erro(s)</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3 leading-relaxed">${scen.description}</p>
+                        <div class="bg-asfalto p-3 rounded-xl text-xs text-slate-200 border border-slate-800">
+                            <strong>💡 Explicação CTB (${scen.article}):</strong> ${scen.explanation}
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+
+            // ================= CERTIFICATE GENERATOR =================
+            updateCertificateData() {
+                document.getElementById('certDriverName').innerText = this.state.userName.toUpperCase();
+                const levelTitles = ['Nível 1 • Aprendiz 🔰', 'Nível 2 • Habilitada PPD 🚘', 'Nível 3 • Defensiva 🛡️', 'Nível 4 • Especialista 🏆', 'Nível 5 • Mestre 👑'];
+                document.getElementById('certLevelText').innerText = levelTitles[this.state.level - 1];
+                document.getElementById('certDateText').innerText = new Date().toLocaleDateString('pt-BR');
+                document.getElementById('certCodeText').innerText = `CTB-${Math.floor(1000 + Math.random() * 9000)}-${new Date().getFullYear()}`;
+            }
+
+            // ================= MODAL & UTILS =================
+            showModal(title, body, icon = '🎉', hasInput = false, onConfirm = null) {
+                document.getElementById('modalTitle').innerText = title;
+                document.getElementById('modalBody').innerText = body;
+                document.getElementById('modalIcon').innerText = icon;
+
+                const inputWrap = document.getElementById('modalInputWrapper');
+                if (hasInput) {
+                    inputWrap.classList.remove('hidden');
+                } else {
+                    inputWrap.classList.add('hidden');
+                }
+
+                this.modalConfirmCallback = onConfirm;
+                document.getElementById('appModal').classList.remove('hidden');
+            }
+
+            closeModal() {
+                document.getElementById('appModal').classList.add('hidden');
+                if (this.modalConfirmCallback) {
+                    this.modalConfirmCallback();
+                    this.modalConfirmCallback = null;
+                }
+            }
+
+            resetDataConfirm() {
+                this.showModal(
+                    '🔄 Reiniciar Todo o Progresso?',
+                    'Tem certeza que deseja apagar o histórico de pontos, nível e veículos desbloqueados?',
+                    '⚠️',
+                    false,
+                    () => {
+                        localStorage.removeItem(this.STORAGE_KEY);
+                        location.reload();
+                    }
+                );
+            }
+
+            // Confetti Animation Effect
+            initConfetti() {
+                this.canvas = document.getElementById('confettiCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                window.addEventListener('resize', () => {
+                    this.canvas.width = window.innerWidth;
+                    this.canvas.height = window.innerHeight;
+                });
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            triggerConfetti() {
+                for (let i = 0; i < 80; i++) {
+                    this.particles.push({
+                        x: window.innerWidth / 2,
+                        y: window.innerHeight / 2,
+                        vx: (Math.random() - 0.5) * 12,
+                        vy: (Math.random() - 0.5) * 12 - 4,
+                        size: Math.random() * 8 + 4,
+                        color: ['#ffd166', '#06d6a0', '#ef476f', '#118ab2', '#f7b801'][Math.floor(Math.random() * 5)],
+                        alpha: 1
+                    });
+                }
+                this.animateConfetti();
+            }
+
+            animateConfetti() {
+                if (this.particles.length === 0) return;
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                this.particles.forEach((p, index) => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.2; // gravity
+                    p.alpha -= 0.015;
+
+                    this.ctx.globalAlpha = Math.max(0, p.alpha);
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.fillRect(p.x, p.y, p.size, p.size);
+
+                    if (p.alpha <= 0) {
+                        this.particles.splice(index, 1);
+                    }
+                });
+
+                if (this.particles.length > 0) {
+                    requestAnimationFrame(() => this.animateConfetti());
+                }
+            }
+        }
+
+        // Initialize App on Window Load
+        let app;
+        window.addEventListener('DOMContentLoaded', () => {
+            app = new AutoEscolaApp();
+            app.init();
         });
-      }
-    }
-
-    /* --------------------------------------------------------------------------
-       MODO 3: SIMULADOR DE REAÇÃO E FRENAGEM
-       -------------------------------------------------------------------------- */
-    let brakeState = "idle"; // idle, running, obstacle, stopped
-    let startTime = 0;
-    let animFrame = null;
-    let carX = 20;
-
-    function renderFrenagemMode(container) {
-      document.getElementById('gameStageTitle').innerText = "3. Reação e Frenagem";
-
-      container.innerHTML = `
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">
-          Clique em <strong>INICIAR</strong>. Quando o perigo surgir de surpresa, clique em <strong>FREAR AGORA!</strong> imediatamente.
-        </p>
-
-        <div class="canvas-container">
-          <canvas id="brakeCanvas" width="700" height="220" style="width:100%; height:100%;"></canvas>
-        </div>
-
-        <div style="display: flex; gap: 12px;">
-          <button class="btn btn-secondary" style="flex:1;" id="btnStartBrake" onclick="startBrakeTest()">🚗 Iniciar Teste</button>
-          <button class="btn brake-btn" style="flex:2;" id="btnActionBrake" disabled onclick="triggerBrake()">🛑 FREAR AGORA!</button>
-        </div>
-
-        <div id="brakeFeedback" style="margin-top: 14px; text-align: center; font-weight: 600;"></div>
-      `;
-
-      drawBrakeCanvas();
-    }
-
-    function drawBrakeCanvas(obstacleVisible = false, obstacleType = "🐕") {
-      const cvs = document.getElementById('brakeCanvas');
-      if (!cvs) return;
-      const ctx = cvs.getContext('2d');
-      ctx.clearRect(0, 0, cvs.width, cvs.height);
-
-      // Pista
-      ctx.fillStyle = "#1e293b";
-      ctx.fillRect(0, 140, 700, 80);
-      // Faixa da pista
-      ctx.strokeStyle = "#f59e0b";
-      ctx.setLineDash([20, 15]);
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.moveTo(0, 180); ctx.lineTo(700, 180);
-      ctx.stroke();
-
-      // Obstáculo
-      if (obstacleVisible) {
-        ctx.font = "40px sans-serif";
-        ctx.fillText(obstacleType, 520, 175);
-      }
-
-      // Carro
-      ctx.font = "40px sans-serif";
-      ctx.fillText("🚘", carX, 175);
-    }
-
-    function startBrakeTest() {
-      brakeState = "running";
-      carX = 20;
-      document.getElementById('btnStartBrake').disabled = true;
-      document.getElementById('btnActionBrake').disabled = false;
-      document.getElementById('brakeFeedback').innerText = "Acelerando... Fique atenta!";
-
-      function loop() {
-        if (brakeState === "running") {
-          carX += 3;
-          if (carX > 250 && Math.random() < 0.03 && brakeState !== "obstacle") {
-            brakeState = "obstacle";
-            startTime = performance.now();
-          }
-        } else if (brakeState === "obstacle") {
-          carX += 3;
-        }
-
-        drawBrakeCanvas(brakeState === "obstacle");
-
-        if (carX > 600) {
-          // Não freou a tempo
-          brakeState = "stopped";
-          Sound.playError();
-          registerAnswer(false, 0, 7, "Infração Gravíssima", "Você não freou a tempo! A uma velocidade de 60km/h, você percorre cerca de 12 metros por segundo só enquanto reage.", {
-            id: "frenagem_timeout",
-            title: "Falta de Reação ao Frear"
-          });
-          document.getElementById('btnStartBrake').disabled = false;
-          document.getElementById('btnActionBrake').disabled = true;
-          return;
-        }
-
-        if (brakeState !== "stopped") {
-          animFrame = requestAnimationFrame(loop);
-        }
-      }
-
-      loop();
-    }
-
-    function triggerBrake() {
-      if (brakeState === "obstacle") {
-        const reactionTime = Math.round(performance.now() - startTime);
-        brakeState = "stopped";
-        cancelAnimationFrame(animFrame);
-        Sound.playBrake();
-
-        document.getElementById('btnStartBrake').disabled = false;
-        document.getElementById('btnActionBrake').disabled = true;
-
-        if (reactionTime < 600) {
-          registerAnswer(true, 120, 0, "", "");
-          document.getElementById('brakeFeedback').innerText = `⚡ Excelente! Tempo de Reação: ${reactionTime} ms. Você parou com total segurança!`;
-        } else {
-          registerAnswer(false, 0, 4, "Infração Média", `Tempo de reação elevado (${reactionTime} ms). O tempo ideal fica abaixo de 500 ms.`, {
-            id: "frenagem_lenta",
-            title: "Tempo de Reação Elevado"
-          });
-        }
-      } else if (brakeState === "running") {
-        // Freou antes do obstáculo
-        brakeState = "stopped";
-        cancelAnimationFrame(animFrame);
-        document.getElementById('btnStartBrake').disabled = false;
-        document.getElementById('btnActionBrake').disabled = true;
-        document.getElementById('brakeFeedback').innerText = "⚠️ Você freou sem necessidade antes do perigo surgir!";
-      }
-    }
-
-    /* --------------------------------------------------------------------------
-       MODO 4: CAÇA ÀS INFRAÇÕES
-       -------------------------------------------------------------------------- */
-    const spotInfractions = [
-      { id: "s1", top: "45%", left: "20%", name: "Estacionar na Faixa", sev: "Infração Grave", pts: 5, exp: "Art. 181, VIII do CTB: Estacionar sobre a faixa de pedestre impõe multa e 5 pontos na CNH." },
-      { id: "s2", top: "30%", left: "65%", name: "Uso de Celular", sev: "Infração Gravíssima", pts: 7, exp: "Art. 252 do CTB: Segurar ou manusear telefone celular enquanto dirige é infração gravíssima com 7 pontos." }
-    ];
-
-    let foundSpotsCount = 0;
-
-    function renderCacaInfracoesMode(container) {
-      document.getElementById('gameStageTitle').innerText = "4. Encontre as Infrações";
-      foundSpotsCount = 0;
-
-      container.innerHTML = `
-        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px;">
-          Toque nos locais da cidade onde você identifica erros ou infrações de trânsito:
-        </p>
-
-        <div class="spot-scene" style="height: 300px;">
-          <svg viewBox="0 0 400 300" width="100%" height="100%">
-            <rect width="400" height="300" fill="#0f172a"/>
-            <!-- Vias e Prédios -->
-            <rect x="0" y="120" width="400" height="80" fill="#334155"/>
-            <!-- Faixa pedestres -->
-            <rect x="80" y="120" width="30" height="80" fill="#fff" stroke="#334155" stroke-dasharray="0,10,0"/>
-            <!-- Carro na faixa -->
-            <rect x="75" y="130" width="40" height="25" rx="4" fill="#ef4444"/>
-            <!-- Motorista celular -->
-            <circle cx="270" cy="90" r="18" fill="#3b82f6"/>
-            <text x="270" y="95" fill="#fff" font-size="14" text-anchor="middle">📱</text>
-          </svg>
-
-          ${spotInfractions.map(s => `
-            <div class="hotspot" id="${s.id}" style="top: ${s.top}; left:${s.left}; width: 45px; height: 45px;"
-                 onclick="clickSpot('${s.id}')"></div>
-          `).join('')}
-        </div>
-
-        <div id="spotProgress" style="margin-top: 12px; font-weight: 700; text-align: center;">
-          Infrações encontradas: 0 / ${spotInfractions.length}
-        </div>
-      `;
-    }
-
-    function clickSpot(id) {
-      const spot = spotInfractions.find(s => s.id === id);
-      const el = document.getElementById(id);
-      if (!el || el.classList.contains('found')) return;
-
-      el.classList.add('found');
-      foundSpotsCount += 1;
-
-      document.getElementById('spotProgress').innerText = `Infrações encontradas: ${foundSpotsCount} / ${spotInfractions.length}`;
-      registerAnswer(true, 100, 0, "", "");
-
-      // Exibir detalhe pedagógico
-      openBottomSheet("Infração Identificada! 🎉", 0, `${spot.name}: ${spot.exp}`);
-    }
-
-    /* ==========================================================================
-       MÓDULO DE REVISÃO: REFAZER ERROS (REPETIÇÃO ESPAÇADA)
-       ========================================================================== */
-    function startErrorsReview() {
-      if (state.errors.length === 0) {
-        alert("Excelente! Você não possui nenhuma infração registrada para revisar no momento.");
-        return;
-      }
-
-      showScreen('screenGame');
-      document.getElementById('gameStageTitle').innerText = "Módulo Especial: Refazer Meus Erros";
-      
-      const container = document.getElementById('gameContent');
-      const q = state.errors[0];
-
-      container.innerHTML = `
-        <div style="background: rgba(239, 68, 68, 0.1); padding: 12px; border-radius: 12px; margin-bottom: 16px;">
-          <h4 style="color: var(--danger);">🔄 Módulo de Reciclagem Focada</h4>
-          <p style="font-size: 0.85rem; color: var(--text-muted);">Acertar esta questão removerá 1 erro do seu histórico!</p>
-        </div>
-
-        <h3>${q.title || "Revisão de Conceito"}</h3>
-        <p style="margin: 14px 0; font-size: 0.95rem;">${q.explanation || "Analise a regra e confirme o seu aprendizado."}</p>
-
-        <button class="btn" onclick="resolveError('${q.id}')">Compreendi a Regra e Quero Corrigir 🟢</button>
-      `;
-    }
-
-    function resolveError(id) {
-      state.errors = state.errors.filter(e => e.id !== id);
-      if (state.cnhPoints > 0) state.cnhPoints -= 1; // Recompensa por revisar
-      saveState();
-      Sound.playSuccess();
-      alert("Ótimo trabalho! Erro corrigido e 1 ponto abatido da carteira.");
-      goHome();
-    }
-
-    /* ==========================================================================
-       TELA DE RECICLAGEM / CNH SUSPENSA
-       ========================================================================== */
-    function triggerReciclagem() {
-      showScreen('screenReciclagem');
-      const container = document.getElementById('reciclagemQuiz');
-
-      container.innerHTML = `
-        <div style="background: #1e293b; padding: 16px; border-radius: 12px; border: 1px solid var(--card-border);">
-          <p style="font-weight: 700; margin-bottom: 10px;">Questão de Reciclagem: Qual a atitude correta em relação ao pedestre na faixa?</p>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <button class="btn-option" onclick="completeReciclagem(true)">Parar totalmente o veículo e dar preferência</button>
-            <button class="btn-option" onclick="completeReciclagem(false)">Acelerar e buzinar para o pedestre apressar o passo</button>
-          </div>
-        </div>
-      `;
-    }
-
-    function completeReciclagem(isCorrect) {
-      if (isCorrect) {
-        state.cnhPoints = 0;
-        saveState();
-        Sound.playSuccess();
-        alert("Parabéns! Você concluiu a reciclagem e sua CNH foi reabilitada com 0 pontos!");
-        goHome();
-      } else {
-        Sound.playError();
-        alert("Resposta incorreta. Leia com atenção e tente novamente.");
-      }
-    }
-
-    /* ==========================================================================
-       INICIALIZAÇÃO DA APLICAÇÃO
-       ========================================================================== */
-    window.addEventListener('DOMContentLoaded', () => {
-      updateHeaderUI();
-    });
-  </script>
+    </script>
 </body>
 </html>

@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AutoEscola Hero - Aprenzo de Trânsito Interativo</title>
+  <style>
+    :root {
+      --bg-main: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --radius: 16px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+      overflow-x: hidden;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 800px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      min-height: 650px;
+    }
+
+    /* HEADER E GAMIFICAÇÃO */
+    header {
+      background: #0f172a;
+      padding: 16px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge-cnh {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stats-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .stat-chip {
+      background: #334155;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .combo-chip {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #fff;
+      animation: pulse 1.5s infinite;
+    }
+
+    /* BARRA DE PONTOS CNH (REVERSA) */
+    .cnh-meter-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .cnh-meter-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .meter-bar {
+      height: 12px;
+      background: #334155;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .meter-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--success);
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s;
+    }
+
+    .meter-fill.warning { background: var(--warning); }
+    .meter-fill.danger { background: var(--danger); }
+
+    /* GERENCIADOR DE TELAS (TRANSIÇÃO SUAVE) */
+    .screen {
+      display: none;
+      padding: 20px;
+      flex: 1;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .screen.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* MENU PRINCIPAL / DASHBOARD */
+    .welcome-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: #fff;
+    }
+
+    .welcome-subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+
+    .levels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .level-card {
+      background: #1e293b;
+      border: 2px solid var(--card-border);
+      border-radius: 14px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+    }
+
+    .level-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2);
+    }
+
+    .level-card.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      filter: grayscale(0.8);
+    }
+
+    .level-icon {
+      font-size: 2rem;
+    }
+
+    .level-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .level-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      background: var(--primary-hover);
+      transform: scale(1.02);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      background: #334155;
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: #475569;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+    }
+
+    /* MODOS DE JOGO */
+    /* 1. Cruzamentos */
+    .svg-container {
+      width: 100%;
+      max-height: 320px;
+      background: #0f172a;
+      border-radius: 14px;
+      border: 1px solid var(--card-border);
+      overflow: hidden;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn-option {
+      background: #334155;
+      border: 2px solid transparent;
+      color: #fff;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-align: center;
+    }
+
+    .btn-option:hover {
+      border-color: var(--primary);
+      background: #475569;
+    }
+
+    .btn-option.correct-pop {
+      animation: popSuccess 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      background: var(--success) !important;
+      border-color: #059669 !important;
+    }
+
+    .btn-option.shake-error {
+      animation: shake 0.4s ease forwards;
+      background: var(--danger) !important;
+      border-color: #dc2626 !important;
+    }
+
+    /* 2. Drag & Drop de Placas */
+    .drag-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .plates-pool {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      min-height: 90px;
+      background: #0f172a;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px dashed var(--card-border);
+    }
+
+    .plate-card {
+      width: 75px;
+      height: 75px;
+      background: #fff;
+      color: #000;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.75rem;
+      cursor: grab;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+      touch-action: none;
+    }
+
+    .plate-card:active {
+      cursor: grabbing;
+      transform: scale(1.08);
+    }
+
+    .plate-card.selected-tap {
+      outline: 3px solid var(--primary);
+      transform: scale(1.1);
+    }
+
+    .drop-zones-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .drop-zone {
+      background: #1e293b;
+      border: 2px dashed var(--card-border);
+      border-radius: 12px;
+      padding: 10px;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .drop-zone.hovered {
+      background: #334155;
+      border-color: var(--primary);
+    }
+
+    .drop-zone-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    /* 3. Simulador de Frenagem */
+    .canvas-container {
+      width: 100%;
+      height: 220px;
+      background: #020617;
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 16px;
+      border: 1px solid var(--card-border);
+    }
+
+    .brake-btn {
+      width: 100%;
+      padding: 18px;
+      font-size: 1.2rem;
+      background: var(--danger);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    .brake-btn:disabled {
+      background: #475569;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    /* 4. Encontre a Infração */
+    .spot-scene {
+      position: relative;
+      width: 100%;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      background: #0f172a;
+    }
+
+    .hotspot {
+      position: absolute;
+      border: 2px dashed rgba(245, 158, 11, 0.6);
+      border-radius: 50%;
+      cursor: pointer;
+      background: rgba(245, 158, 11, 0.15);
+      transition: all 0.3s;
+    }
+
+    .hotspot.found {
+      border: 3px solid var(--success);
+      background: rgba(16, 185, 129, 0.3);
+      animation: popSuccess 0.4s forwards;
+    }
+
+    /* BOTTOM SHEET (POR QUE ERREI?) */
+    .bottom-sheet-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .bottom-sheet-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .bottom-sheet {
+      background: #1e293b;
+      width: 100%;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border-top: 2px solid var(--danger);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .bottom-sheet-overlay.active .bottom-sheet {
+      transform: translateY(0);
+    }
+
+    .sheet-tag {
+      align-self: flex-start;
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .sheet-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .sheet-body {
+      font-size: 0.95rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    /* MODAL DICA DA RODADA */
+    .modal-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 90;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #1e293b;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 500px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .tip-bullet {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 0.9rem;
+      color: #e2e8f0;
+    }
+
+    .tip-bullet span {
+      background: var(--primary);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+      font-weight: bold;
+    }
+
+    /* KEYFRAMES E ANIMAÇÕES */
+    @keyframes popSuccess {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.03); }
+    }
+
+    /* TELA DE RECICLAGEM / CNH SUSPENSA */
+    .reciclagem-box {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+    }
+
+    .reciclagem-icon {
+      font-size: 3.5rem;
+      animation: shake 0.6s ease;
+    }
+
+    /* RESPONSIVIDADE */
+    @media (max-width: 600px) {
+      .drop-zones-container {
+        grid-template-columns: 1fr;
+      }
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="app">
+    <!-- HEADER GAMIFICADO -->
+    <header>
+      <div class="header-top">
+        <div class="badge-cnh" id="cnhBadge">
+          🔰 Categoria: PPD
+        </div>
+        <div class="stats-group">
+          <div class="stat-chip combo-chip" id="comboChip">⚡ Combo 1x</div>
+          <div class="stat-chip">⭐ <span id="xpScore">0</span> XP</div>
+          <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="resetProgress()">⚙️ Reiniciar</button>
+        </div>
+      </div>
+
+      <!-- MEDIDOR REVERSO DE PONTOS DA CNH -->
+      <div class="cnh-meter-container">
+        <div class="cnh-meter-label">
+          <span>Pontuação na Carteira (Limite: 20 pts)</span>
+          <span id="cnhPointsText">0 / 20 pts</span>
+        </div>
+        <div class="meter-bar">
+          <div class="meter-fill" id="cnhMeterFill"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 1. DASHBOARD / MENU PRINCIPAL -->
+    <div class="screen active" id="screenDashboard">
+      <h1 class="welcome-title">Olá, Futura Motorista! 🚗</h1>
+      <p class="welcome-subtitle">Escolha um módulo e teste seus conhecimentos de trânsito de forma divertida.</p>
+
+      <div class="levels-grid">
+        <div class="level-card" onclick="startLevel(1)">
+          <div class="level-icon">🚦</div>
+          <div class="level-title">1. Cruzamentos</div>
+          <div class="level-desc">Quem tem a preferência? Identifique a vez de cada veículo na travessia.</div>
+        </div>
+
+        <div class="level-card" onclick="startLevel(2)">
+          <div class="level-icon">🪧</div>
+          <div class="level-title">2. Placas de Trânsito</div>
+          <div class="level-desc">Classifique as placas em Regulamentação, Advertência ou Indicação.</div>
+        </div>
+
+        <div class="level-card" onclick="startLevel(3)">
+          <div class="level-icon">⏹️</div>
+          <div class="level-title">3. Reação e Frenagem</div>
+          <div class="level-desc">Testador de tempo de reação! Reaja rápido para evitar acidentes.</div>
+        </div>
+
+        <div class="level-card" onclick="startLevel(4)">
+          <div class="level-icon">🔍</div>
+          <div class="level-title">4. Caça às Infrações</div>
+          <div class="level-desc">Encontre motoristas e pedestres cometendo erros na cidade.</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: auto;">
+        <button class="btn btn-secondary" style="flex: 1;" onclick="startErrorsReview()" id="btnReviewErrors">
+          🔄 Refazer Meus Erros (<span id="errorCount">0</span>)
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. SCREEN JOGO - MÓDULO GENERICO -->
+    <div class="screen" id="screenGame">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="goHome()">← Voltar</button>
+        <span style="font-weight: 700; font-size: 0.9rem;" id="gameStageTitle">Módulo 1</span>
+      </div>
+
+      <div id="gameContent" style="flex: 1; display: flex; flex-direction: column;">
+        <!-- Injetado dinamicamente via JS -->
+      </div>
+    </div>
+
+    <!-- 3. TELA DE RECICLAGEM (CNH SUSPENSA) -->
+    <div class="screen" id="screenReciclagem">
+      <div class="reciclagem-box">
+        <div class="reciclagem-icon">🚨</div>
+        <h2 style="color: var(--danger);">CNH SUSPENSA!</h2>
+        <p>Você atingiu 20 ou mais pontos na carteira devido a infrações cometidas.</p>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">Para recuperar sua licença e zerar seus pontos, você precisa concluir o Mini-Curso de Reciclagem Obrigatório abaixo.</p>
+
+        <div id="reciclagemQuiz" style="width: 100%; text-align: left; margin-top: 10px;">
+          <!-- Conteúdo do teste de reciclagem -->
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DICA DA RODADA -->
+    <div class="modal-overlay" id="modalTip">
+      <div class="modal-card">
+        <h2 id="tipTitle">💡 Dica da Rodada</h2>
+        <div id="tipBullets" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        <button class="btn" onclick="closeTipAndStart()">Começar Módulo 🚀</button>
+      </div>
+    </div>
+
+    <!-- BOTTOM SHEET (POR QUE ERREI?) -->
+    <div class="bottom-sheet-overlay" id="bottomSheet">
+      <div class="bottom-sheet">
+        <div class="sheet-tag" id="sheetSeverity">Infração Grave (+5 Pts)</div>
+        <div class="sheet-title" id="sheetTitle">Por que esta resposta está incorreta?</div>
+        <div class="sheet-body" id="sheetExplanation">
+          Explicação didática segundo o Código de Trânsito Brasileiro.
+        </div>
+        <button class="btn" style="margin-top: 8px;" onclick="closeBottomSheet()">Entendi e Quero Continuar ➡️</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /* ==========================================================================
+       ESTADO DA APLICAÇÃO & PERSISTÊNCIA LOCALSTORAGE
+       ========================================================================== */
+    const STORAGE_KEY = "autoescola_hero_state_v1";
+
+    const defaultState = {
+      xp: 0,
+      cnhPoints: 0,
+      cnhMax: 20,
+      badgeTitle: "PPD (Permissão Para Dirigir)",
+      combo: 1,
+      streak: 0,
+      errors: [], // Guardará questões com falha
+      currentLevel: 1
+    };
+
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : { ...defaultState };
+      } catch (e) {
+        return { ...defaultState };
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.error("Erro ao salvar localStorage", e);
+      }
+      updateHeaderUI();
+    }
+
+    function resetProgress() {
+      if (confirm("Deseja realmente zerar todo o seu progresso e pontos da CNH?")) {
+        state = { ...defaultState };
+        saveState();
+        showScreen("screenDashboard");
+      }
+    }
+
+    /* ==========================================================================
+       SISTEMA DE ÁUDIO WEB (EFEITOS SONOROS SEM ARQUIVOS EXTERNOS)
+       ========================================================================== */
+    const Sound = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+      playSuccess() {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.15);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(now); osc.stop(now + 0.3);
+      },
+      playError() {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.linearRampToValueAtTime(100, now + 0.25);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(now); osc.stop(now + 0.3);
+      },
+      playBrake() {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(150, now + 0.2);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(now); osc.stop(now + 0.25);
+      }
+    };
+
+    /* ==========================================================================
+       ATUALIZAÇÃO DE INTERFACE / HEADER
+       ========================================================================== */
+    function updateHeaderUI() {
+      // Atualizar Badges
+      if (state.xp >= 1500) state.badgeTitle = "Especialista em Rodovias 🛣️";
+      else if (state.xp >= 800) state.badgeTitle = "Motorista Ouro 🥇";
+      else if (state.xp >= 300) state.badgeTitle = "Motorista Prata 🥈";
+      else state.badgeTitle = "PPD (Permissão) 🔰";
+
+      document.getElementById('cnhBadge').innerText = state.badgeTitle;
+      document.getElementById('xpScore').innerText = state.xp;
+      document.getElementById('comboChip').innerText = `⚡ Combo ${state.combo}x`;
+      document.getElementById('errorCount').innerText = state.errors.length;
+
+      // Barra de Pontos Reversa
+      const meterFill = document.getElementById('cnhMeterFill');
+      const pointsText = document.getElementById('cnhPointsText');
+      const pct = Math.min((state.cnhPoints / state.cnhMax) * 100, 100);
+      
+      meterFill.style.width = `${pct}%`;
+      pointsText.innerText = `${state.cnhPoints} / ${state.cnhMax} pts`;
+
+      meterFill.className = 'meter-fill';
+      if (state.cnhPoints >= 15) meterFill.classList.add('danger');
+      else if (state.cnhPoints >= 8) meterFill.classList.add('warning');
+
+      // Checar Reciclagem
+      if (state.cnhPoints >= state.cnhMax) {
+        triggerReciclagem();
+      }
+    }
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(screenId);
+      if (target) target.classList.add('active');
+      updateHeaderUI();
+    }
+
+    function goHome() {
+      showScreen('screenDashboard');
+    }
+
+    /* ==========================================================================
+       SISTEMA PEDAGÓGICO: ERROS & BOTTOM SHEET
+       ========================================================================== */
+    let currentErrorCallback = null;
+
+    function registerAnswer(isCorrect, xpGain, pointsPenalty, severityText, explanationText, questionObj = null) {
+      if (isCorrect) {
+        Sound.playSuccess();
+        state.streak += 1;
+        if (state.streak >= 3) state.combo = 3;
+        else if (state.streak >= 2) state.combo = 2;
+        
+        state.xp += xpGain * state.combo;
+        saveState();
+        return true;
+      } else {
+        Sound.playError();
+        state.streak = 0;
+        state.combo = 1;
+        state.cnhPoints += pointsPenalty;
+
+        if (questionObj) {
+          const exists = state.errors.some(e => e.id === questionObj.id);
+          if (!exists) state.errors.push(questionObj);
+        }
+
+        saveState();
+        openBottomSheet(severityText, pointsPenalty, explanationText);
+        return false;
+      }
+    }
+
+    function openBottomSheet(severityText, penalty, explanation) {
+      document.getElementById('sheetSeverity').innerText = `${severityText} (+${penalty} Pontos CNH)`;
+      document.getElementById('sheetTitle').innerText = "Atenção à Regra de Trânsito!";
+      document.getElementById('sheetExplanation').innerText = explanation;
+      
+      const bs = document.getElementById('bottomSheet');
+      bs.classList.add('active');
+    }
+
+    function closeBottomSheet() {
+      document.getElementById('bottomSheet').classList.remove('active');
+      if (currentErrorCallback) {
+        currentErrorCallback();
+        currentErrorCallback = null;
+      }
+    }
+
+    /* ==========================================================================
+       DICAS DA RODADA (MODAL PRÉ-FASE)
+       ========================================================================== */
+    const stageTips = {
+      1: {
+        title: "💡 Dica: Cruzamentos e Preferência",
+        bullets: [
+          "1. Sem sinalização: A preferência é SEMPRE de quem vem pela DIREITA.",
+          "2. Rotatórias: A preferência é de quem JÁ ESTÁ circulando nela.",
+          "3. Pedestres: Têm prioridade total na faixa não semaforizada."
+        ]
+      },
+      2: {
+        title: "💡 Dica: Categorias de Placas",
+        bullets: [
+          "1. Regulamentação (Borda Vermelha): Impõe proibições, obrigações ou restrições.",
+          "2. Advertência (Amarelas): Alerta sobre perigos potenciais na via.",
+          "3. Indicação (Azuis/Verdes): Orienta caminhos, serviços e locais."
+        ]
+      },
+      3: {
+        title: "💡 Dica: Reação e Frenagem",
+        bullets: [
+          "1. Tempo de Reação: O tempo entre ver o perigo e pisar no freio (médium de 0.75s).",
+          "2. Distância de Parada = Distância de Reação + Distância de Frenagem.",
+          "3. Quanto maior a velocidade, maior o espaço necessário para parar com segurança."
+        ]
+      },
+      4: {
+        title: "💡 Dica: Infração e Segurança",
+        bullets: [
+          "1. Celular ao volante e falta de capacete são Infrações Gravíssimas (7 pontos).",
+          "2. Estacionar sobre a faixa de pedestres é Infração Grave (5 pontos).",
+          "3. Fique de olho na imagem para identificar os comportamentos perigosos!"
+        ]
+      }
+    };
+
+    let selectedLevelToStart = 1;
+
+    function startLevel(levelNum) {
+      selectedLevelToStart = levelNum;
+      const tip = stageTips[levelNum];
+      document.getElementById('tipTitle').innerText = tip.title;
+      const container = document.getElementById('tipBullets');
+      container.innerHTML = tip.bullets.map(b => `<div class="tip-bullet"><span>✓</span> <div>${b}</div></div>`).join('');
+      document.getElementById('modalTip').classList.add('active');
+    }
+
+    function closeTipAndStart() {
+      document.getElementById('modalTip').classList.remove('active');
+      showScreen('screenGame');
+      loadGameMode(selectedLevelToStart);
+    }
+
+    /* ==========================================================================
+       CARREGADOR DOS MODOS DE JOGO
+       ========================================================================== */
+    function loadGameMode(levelNum) {
+      state.currentLevel = levelNum;
+      const container = document.getElementById('gameContent');
+      container.innerHTML = "";
+
+      if (levelNum === 1) renderCruzamentosMode(container);
+      else if (levelNum === 2) renderPlacasMode(container);
+      else if (levelNum === 3) renderFrenagemMode(container);
+      else if (levelNum === 4) renderCacaInfracoesMode(container);
+    }
+
+    /* --------------------------------------------------------------------------
+       MODO 1: CRUZAMENTOS INTERATIVOS
+       -------------------------------------------------------------------------- */
+    const cruzamentoQuestions = [
+      {
+        id: "cruz_1",
+        title: "Cruzamento Sem Sinalização",
+        question: "Dois carros chegam juntos a um cruzamento sem placas ou semáforo. Quem deve avançar primeiro?",
+        options: [
+          { text: "🚗 Carro B (Vermelho - Vem da Direita)", correct: true },
+          { text: "🚙 Carro A (Azul)", correct: false }
+        ],
+        severity: "Infração Gravíssima",
+        penalty: 7,
+        explanation: "Art. 29, III, 'a' do CTB: Quando veículos se cruzarem em local não sinalizado, a preferência de passagem é do veículo que se aproxima pela DIREITA.",
+        svg: `<svg viewBox="0 0 300 200" width="100%" height="100%">
+          <rect width="300" height="200" fill="#0f172a"/>
+          <!-- Vias -->
+          <rect x="120" y="0" width="60" height="200" fill="#334155"/>
+          <rect x="0" y="70" width="300" height="60" fill="#334155"/>
+          <!-- Linhas tracejadas -->
+          <line x1="150" y1="0" x2="150" y2="200" stroke="#f59e0b" stroke-dasharray="8,8" stroke-width="2"/>
+          <line x1="0" y1="100" x2="300" y2="100" stroke="#f59e0b" stroke-dasharray="8,8" stroke-width="2"/>
+          <!-- Carro A (Azul - vindo de baixo) -->
+          <rect x="130" y="140" width="18" height="30" rx="4" fill="#3b82f6"/>
+          <text x="139" y="160" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">A</text>
+          <!-- Carro B (Vermelho - vindo da direita do Carro A) -->
+          <rect x="200" y="78" width="30" height="18" rx="4" fill="#ef4444"/>
+          <text x="215" y="91" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">B</text>
+        </svg>`
+      },
+      {
+        id: "cruz_2",
+        title: "Preferência na Rotatória",
+        question: "O Carro A já está circulando na rotatória. O Carro B está chegando. De quem é a preferência?",
+        options: [
+          { text: "🚗 Carro A (Verde - Já na Rotatória)", correct: true },
+          { text: "🚙 Carro B (Amarelo - Entrando)", correct: false }
+        ],
+        severity: "Infração Grave",
+        penalty: 5,
+        explanation: "Art. 29, III, 'b' do CTB: No caso de rotatória, a preferência é daquele veículo que já estiver circulando por ela.",
+        svg: `<svg viewBox="0 0 300 200" width="100%" height="100%">
+          <rect width="300" height="200" fill="#0f172a"/>
+          <rect x="120" y="0" width="60" height="200" fill="#334155"/>
+          <rect x="0" y="70" width="300" height="60" fill="#334155"/>
+          <circle cx="150" cy="100" r="40" fill="#0f172a" stroke="#334155" stroke-width="20"/>
+          <!-- Carro A na rotatória -->
+          <rect x="115" y="80" width="22" height="14" rx="3" fill="#10b981" transform="rotate(-30 125 87)"/>
+          <text x="126" y="91" fill="#fff" font-size="9" font-weight="bold" text-anchor="middle">A</text>
+          <!-- Carro B se aproximando -->
+          <rect x="220" y="78" width="26" height="16" rx="3" fill="#f59e0b"/>
+          <text x="233" y="90" fill="#fff" font-size="9" font-weight="bold" text-anchor="middle">B</text>
+        </svg>`
+      }
+    ];
+
+    let currentCruzIdx = 0;
+
+    function renderCruzamentosMode(container) {
+      document.getElementById('gameStageTitle').innerText = "1. Cruzamentos & Preferência";
+      const q = cruzamentoQuestions[currentCruzIdx];
+
+      container.innerHTML = `
+        <h3 style="margin-bottom: 8px;">${q.title}</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">${q.question}</p>
+        <div class="svg-container">${q.svg}</div>
+        <div class="options-grid">
+          ${q.options.map((opt, i) => `
+            <button class="btn-option" onclick="checkCruzamentoAnswer(${i}, this)">${opt.text}</button>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function checkCruzamentoAnswer(optIdx, btnEl) {
+      const q = cruzamentoQuestions[currentCruzIdx];
+      const isCorrect = q.options[optIdx].correct;
+
+      if (isCorrect) {
+        btnEl.classList.add('correct-pop');
+        registerAnswer(true, 100, 0, "", "", q);
+        setTimeout(() => {
+          currentCruzIdx = (currentCruzIdx + 1) % cruzamentoQuestions.length;
+          renderCruzamentosMode(document.getElementById('gameContent'));
+        }, 1200);
+      } else {
+        btnEl.classList.add('shake-error');
+        currentErrorCallback = () => {
+          currentCruzIdx = (currentCruzIdx + 1) % cruzamentoQuestions.length;
+          renderCruzamentosMode(document.getElementById('gameContent'));
+        };
+        registerAnswer(false, 0, q.penalty, q.severity, q.explanation, q);
+      }
+    }
+
+    /* --------------------------------------------------------------------------
+       MODO 2: ARRASTAR E SOLTAR DE PLACAS
+       -------------------------------------------------------------------------- */
+    const placasData = [
+      { id: "p1", code: "R-1", text: "PARE", type: "reg", color: "#ef4444", shape: "oct" },
+      { id: "p2", code: "A-1a", text: "Curva", type: "adv", color: "#f59e0b", shape: "rhomb" },
+      { id: "p3", code: "S-1", text: "Hospital", type: "ind", color: "#3b82f6", shape: "rect" },
+      { id: "p4", code: "R-4a", text: "Proibido ↰", type: "reg", color: "#ef4444", shape: "circle" }
+    ];
+
+    let selectedTapPlate = null;
+
+    function renderPlacasMode(container) {
+      document.getElementById('gameStageTitle').innerText = "2. Associação de Placas";
+
+      container.innerHTML = `
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">
+          Arraste ou toque na placa e depois selecione a categoria correta:
+        </p>
+        
+        <div class="drag-stage">
+          <div class="plates-pool" id="platesPool">
+            ${placasData.map(p => `
+              <div class="plate-card" draggable="true" id="${p.id}" 
+                   data-type="${p.type}" onclick="handlePlateTap('${p.id}')"
+                   ondragstart="handleDragStart(event)">
+                <span style="font-size: 0.7rem; color: #64748b;">${p.code}</span>
+                <span style="font-size: 0.85rem; font-weight: 800; color: ${p.color}">${p.text}</span>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="drop-zones-container">
+            <div class="drop-zone" data-target="reg" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" onclick="handleZoneTap('reg')">
+              <div class="drop-zone-title" style="color: #f87171;">🔴 Regulamentação</div>
+              <div style="font-size:0.75rem; color:#94a3b8; text-align:center;">Obrigação / Proibição</div>
+            </div>
+
+            <div class="drop-zone" data-target="adv" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" onclick="handleZoneTap('adv')">
+              <div class="drop-zone-title" style="color: #fbbf24;">🟡 Advertência</div>
+              <div style="font-size:0.75rem; color:#94a3b8; text-align:center;">Alerta de Perigo</div>
+            </div>
+
+            <div class="drop-zone" data-target="ind" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" onclick="handleZoneTap('ind')">
+              <div class="drop-zone-title" style="color: #60a5fa;">🔵 Indicação</div>
+              <div style="font-size:0.75rem; color:#94a3b8; text-align:center;">Orientação / Serviço</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function handlePlateTap(id) {
+      document.querySelectorAll('.plate-card').forEach(c => c.classList.remove('selected-tap'));
+      selectedTapPlate = placasData.find(p => p.id === id);
+      const el = document.getElementById(id);
+      if (el) el.classList.add('selected-tap');
+    }
+
+    function handleZoneTap(targetType) {
+      if (!selectedTapPlate) return;
+      evaluatePlateDrop(selectedTapPlate.id, selectedTapPlate.type, targetType);
+      selectedTapPlate = null;
+    }
+
+    function handleDragStart(e) {
+      e.dataTransfer.setData("text/plain", e.target.id);
+      e.dataTransfer.setData("type", e.target.dataset.type);
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      const id = e.dataTransfer.getData("text/plain");
+      const type = e.dataTransfer.getData("type");
+      const dropZone = e.currentTarget;
+      const targetType = dropZone.dataset.target;
+      evaluatePlateDrop(id, type, targetType);
+    }
+
+    function evaluatePlateDrop(plateId, plateType, targetType) {
+      const plateEl = document.getElementById(plateId);
+      if (!plateEl) return;
+
+      if (plateType === targetType) {
+        registerAnswer(true, 80, 0, "", "");
+        plateEl.style.opacity = "0.3";
+        plateEl.onclick = null;
+        plateEl.draggable = false;
+      } else {
+        registerAnswer(false, 0, 4, "Infração Média", "As placas de Regulamentação são vermelhas (obrigações), Advertência são amarelas (alertas) e Indicação orientam caminhos.", {
+          id: `placa_err_${plateId}`,
+          title: "Classificação de Placas"
+        });
+      }
+    }
+
+    /* --------------------------------------------------------------------------
+       MODO 3: SIMULADOR DE REAÇÃO E FRENAGEM
+       -------------------------------------------------------------------------- */
+    let brakeState = "idle"; // idle, running, obstacle, stopped
+    let startTime = 0;
+    let animFrame = null;
+    let carX = 20;
+
+    function renderFrenagemMode(container) {
+      document.getElementById('gameStageTitle').innerText = "3. Reação e Frenagem";
+
+      container.innerHTML = `
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">
+          Clique em <strong>INICIAR</strong>. Quando o perigo surgir de surpresa, clique em <strong>FREAR AGORA!</strong> imediatamente.
+        </p>
+
+        <div class="canvas-container">
+          <canvas id="brakeCanvas" width="700" height="220" style="width:100%; height:100%;"></canvas>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+          <button class="btn btn-secondary" style="flex:1;" id="btnStartBrake" onclick="startBrakeTest()">🚗 Iniciar Teste</button>
+          <button class="btn brake-btn" style="flex:2;" id="btnActionBrake" disabled onclick="triggerBrake()">🛑 FREAR AGORA!</button>
+        </div>
+
+        <div id="brakeFeedback" style="margin-top: 14px; text-align: center; font-weight: 600;"></div>
+      `;
+
+      drawBrakeCanvas();
+    }
+
+    function drawBrakeCanvas(obstacleVisible = false, obstacleType = "🐕") {
+      const cvs = document.getElementById('brakeCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+      // Pista
+      ctx.fillStyle = "#1e293b";
+      ctx.fillRect(0, 140, 700, 80);
+      // Faixa da pista
+      ctx.strokeStyle = "#f59e0b";
+      ctx.setLineDash([20, 15]);
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(0, 180); ctx.lineTo(700, 180);
+      ctx.stroke();
+
+      // Obstáculo
+      if (obstacleVisible) {
+        ctx.font = "40px sans-serif";
+        ctx.fillText(obstacleType, 520, 175);
+      }
+
+      // Carro
+      ctx.font = "40px sans-serif";
+      ctx.fillText("🚘", carX, 175);
+    }
+
+    function startBrakeTest() {
+      brakeState = "running";
+      carX = 20;
+      document.getElementById('btnStartBrake').disabled = true;
+      document.getElementById('btnActionBrake').disabled = false;
+      document.getElementById('brakeFeedback').innerText = "Acelerando... Fique atenta!";
+
+      function loop() {
+        if (brakeState === "running") {
+          carX += 3;
+          if (carX > 250 && Math.random() < 0.03 && brakeState !== "obstacle") {
+            brakeState = "obstacle";
+            startTime = performance.now();
+          }
+        } else if (brakeState === "obstacle") {
+          carX += 3;
+        }
+
+        drawBrakeCanvas(brakeState === "obstacle");
+
+        if (carX > 600) {
+          // Não freou a tempo
+          brakeState = "stopped";
+          Sound.playError();
+          registerAnswer(false, 0, 7, "Infração Gravíssima", "Você não freou a tempo! A uma velocidade de 60km/h, você percorre cerca de 12 metros por segundo só enquanto reage.", {
+            id: "frenagem_timeout",
+            title: "Falta de Reação ao Frear"
+          });
+          document.getElementById('btnStartBrake').disabled = false;
+          document.getElementById('btnActionBrake').disabled = true;
+          return;
+        }
+
+        if (brakeState !== "stopped") {
+          animFrame = requestAnimationFrame(loop);
+        }
+      }
+
+      loop();
+    }
+
+    function triggerBrake() {
+      if (brakeState === "obstacle") {
+        const reactionTime = Math.round(performance.now() - startTime);
+        brakeState = "stopped";
+        cancelAnimationFrame(animFrame);
+        Sound.playBrake();
+
+        document.getElementById('btnStartBrake').disabled = false;
+        document.getElementById('btnActionBrake').disabled = true;
+
+        if (reactionTime < 600) {
+          registerAnswer(true, 120, 0, "", "");
+          document.getElementById('brakeFeedback').innerText = `⚡ Excelente! Tempo de Reação: ${reactionTime} ms. Você parou com total segurança!`;
+        } else {
+          registerAnswer(false, 0, 4, "Infração Média", `Tempo de reação elevado (${reactionTime} ms). O tempo ideal fica abaixo de 500 ms.`, {
+            id: "frenagem_lenta",
+            title: "Tempo de Reação Elevado"
+          });
+        }
+      } else if (brakeState === "running") {
+        // Freou antes do obstáculo
+        brakeState = "stopped";
+        cancelAnimationFrame(animFrame);
+        document.getElementById('btnStartBrake').disabled = false;
+        document.getElementById('btnActionBrake').disabled = true;
+        document.getElementById('brakeFeedback').innerText = "⚠️ Você freou sem necessidade antes do perigo surgir!";
+      }
+    }
+
+    /* --------------------------------------------------------------------------
+       MODO 4: CAÇA ÀS INFRAÇÕES
+       -------------------------------------------------------------------------- */
+    const spotInfractions = [
+      { id: "s1", top: "45%", left: "20%", name: "Estacionar na Faixa", sev: "Infração Grave", pts: 5, exp: "Art. 181, VIII do CTB: Estacionar sobre a faixa de pedestre impõe multa e 5 pontos na CNH." },
+      { id: "s2", top: "30%", left: "65%", name: "Uso de Celular", sev: "Infração Gravíssima", pts: 7, exp: "Art. 252 do CTB: Segurar ou manusear telefone celular enquanto dirige é infração gravíssima com 7 pontos." }
+    ];
+
+    let foundSpotsCount = 0;
+
+    function renderCacaInfracoesMode(container) {
+      document.getElementById('gameStageTitle').innerText = "4. Encontre as Infrações";
+      foundSpotsCount = 0;
+
+      container.innerHTML = `
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px;">
+          Toque nos locais da cidade onde você identifica erros ou infrações de trânsito:
+        </p>
+
+        <div class="spot-scene" style="height: 300px;">
+          <svg viewBox="0 0 400 300" width="100%" height="100%">
+            <rect width="400" height="300" fill="#0f172a"/>
+            <!-- Vias e Prédios -->
+            <rect x="0" y="120" width="400" height="80" fill="#334155"/>
+            <!-- Faixa pedestres -->
+            <rect x="80" y="120" width="30" height="80" fill="#fff" stroke="#334155" stroke-dasharray="0,10,0"/>
+            <!-- Carro na faixa -->
+            <rect x="75" y="130" width="40" height="25" rx="4" fill="#ef4444"/>
+            <!-- Motorista celular -->
+            <circle cx="270" cy="90" r="18" fill="#3b82f6"/>
+            <text x="270" y="95" fill="#fff" font-size="14" text-anchor="middle">📱</text>
+          </svg>
+
+          ${spotInfractions.map(s => `
+            <div class="hotspot" id="${s.id}" style="top: ${s.top}; left:${s.left}; width: 45px; height: 45px;"
+                 onclick="clickSpot('${s.id}')"></div>
+          `).join('')}
+        </div>
+
+        <div id="spotProgress" style="margin-top: 12px; font-weight: 700; text-align: center;">
+          Infrações encontradas: 0 / ${spotInfractions.length}
+        </div>
+      `;
+    }
+
+    function clickSpot(id) {
+      const spot = spotInfractions.find(s => s.id === id);
+      const el = document.getElementById(id);
+      if (!el || el.classList.contains('found')) return;
+
+      el.classList.add('found');
+      foundSpotsCount += 1;
+
+      document.getElementById('spotProgress').innerText = `Infrações encontradas: ${foundSpotsCount} / ${spotInfractions.length}`;
+      registerAnswer(true, 100, 0, "", "");
+
+      // Exibir detalhe pedagógico
+      openBottomSheet("Infração Identificada! 🎉", 0, `${spot.name}: ${spot.exp}`);
+    }
+
+    /* ==========================================================================
+       MÓDULO DE REVISÃO: REFAZER ERROS (REPETIÇÃO ESPAÇADA)
+       ========================================================================== */
+    function startErrorsReview() {
+      if (state.errors.length === 0) {
+        alert("Excelente! Você não possui nenhuma infração registrada para revisar no momento.");
+        return;
+      }
+
+      showScreen('screenGame');
+      document.getElementById('gameStageTitle').innerText = "Módulo Especial: Refazer Meus Erros";
+      
+      const container = document.getElementById('gameContent');
+      const q = state.errors[0];
+
+      container.innerHTML = `
+        <div style="background: rgba(239, 68, 68, 0.1); padding: 12px; border-radius: 12px; margin-bottom: 16px;">
+          <h4 style="color: var(--danger);">🔄 Módulo de Reciclagem Focada</h4>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Acertar esta questão removerá 1 erro do seu histórico!</p>
+        </div>
+
+        <h3>${q.title || "Revisão de Conceito"}</h3>
+        <p style="margin: 14px 0; font-size: 0.95rem;">${q.explanation || "Analise a regra e confirme o seu aprendizado."}</p>
+
+        <button class="btn" onclick="resolveError('${q.id}')">Compreendi a Regra e Quero Corrigir 🟢</button>
+      `;
+    }
+
+    function resolveError(id) {
+      state.errors = state.errors.filter(e => e.id !== id);
+      if (state.cnhPoints > 0) state.cnhPoints -= 1; // Recompensa por revisar
+      saveState();
+      Sound.playSuccess();
+      alert("Ótimo trabalho! Erro corrigido e 1 ponto abatido da carteira.");
+      goHome();
+    }
+
+    /* ==========================================================================
+       TELA DE RECICLAGEM / CNH SUSPENSA
+       ========================================================================== */
+    function triggerReciclagem() {
+      showScreen('screenReciclagem');
+      const container = document.getElementById('reciclagemQuiz');
+
+      container.innerHTML = `
+        <div style="background: #1e293b; padding: 16px; border-radius: 12px; border: 1px solid var(--card-border);">
+          <p style="font-weight: 700; margin-bottom: 10px;">Questão de Reciclagem: Qual a atitude correta em relação ao pedestre na faixa?</p>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button class="btn-option" onclick="completeReciclagem(true)">Parar totalmente o veículo e dar preferência</button>
+            <button class="btn-option" onclick="completeReciclagem(false)">Acelerar e buzinar para o pedestre apressar o passo</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function completeReciclagem(isCorrect) {
+      if (isCorrect) {
+        state.cnhPoints = 0;
+        saveState();
+        Sound.playSuccess();
+        alert("Parabéns! Você concluiu a reciclagem e sua CNH foi reabilitada com 0 pontos!");
+        goHome();
+      } else {
+        Sound.playError();
+        alert("Resposta incorreta. Leia com atenção e tente novamente.");
+      }
+    }
+
+    /* ==========================================================================
+       INICIALIZAÇÃO DA APLICAÇÃO
+       ========================================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+      updateHeaderUI();
+    });
+  </script>
+</body>
+</html>
